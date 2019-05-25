@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+    <roi type="4" enable="0" rgb="4294967040" name="recognition" visible="1">
+        <value name="中心点X值">885.246</value>
+        <value name="中心点Y值">649.729</value>
+        <value name="宽度">577.322</value>
+        <value name="高度">322.354</value>
+        <value name="弧度">-0.00374266</value>
+    </roi>
+    <roi type="4" enable="0" rgb="4278255360" name="detection object" visible="1">
+        <value name="中心点X值">856.05</value>
+        <value name="中心点Y值">627.015</value>
+        <value name="宽度">441.957</value>
+        <value name="高度">193.461</value>
+        <value name="弧度">0.00636121</value>
+    </roi>
+    <roi type="4" enable="0" rgb="4294934528" name="loose hair" visible="1">
+        <value name="中心点X值">981.925</value>
+        <value name="中心点Y值">640.532</value>
+        <value name="宽度">175.119</value>
+        <value name="高度">375.984</value>
+        <value name="弧度">-0.018934</value>
+    </roi>
+</root>

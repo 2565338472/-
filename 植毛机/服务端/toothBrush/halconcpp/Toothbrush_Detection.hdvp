@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<hdevelop file_version="1.0" halcon_version="10.0" cs="235432124">
+<procedure name="Toothbrush_Detection">
+<interface>
+<io>
+<par name="ImageROITrans"/>
+<par name="ImageRectangleROI"/>
+<par name="CheckSide1_ROI"/>
+<par name="RectangleROI_2"/>
+<par name="Rectangle_2"/>
+<par name="RectangleROI"/>
+<par name="Rectangle1"/>
+</io>
+<oo>
+<par name="ImageSub"/>
+<par name="DirtCheckROI"/>
+<par name="RectangleROIDiff_2"/>
+<par name="CheckROI1"/>
+</oo>
+<ic>
+<par name="CheckSide"/>
+<par name="RowMask1"/>
+<par name="ColumnMask1"/>
+<par name="RowMask2"/>
+<par name="ColumnMask2"/>
+<par name="RowMask3"/>
+<par name="ColumnMask3"/>
+<par name="RowMask4"/>
+<par name="ColumnMask4"/>
+<par name="ScoreInput"/>
+</ic>
+<oc>
+<par name="Score"/>
+</oc>
+</interface>
+<body>
+<l>    gen_empty_obj(CheckROI1)</l>
+<l>    count_obj(ImageROITrans, ImageNumber)</l>
+<l>    if(ImageNumber &gt; 0)</l>
+<c>        * 图像作差处理</c>
+<l>        if(CheckSide=0)</l>
+<l>            abs_diff_image(ImageROITrans, ImageRectangleROI, ImageSub, 2)</l>
+<l>        else</l>
+<l>            abs_diff_image(ImageROITrans, ImageRectangleROI, ImageSub, 3)</l>
+<l>        endif</l>
+<l>        median_image(ImageSub, ImageSub, 'circle', 5, 'mirrored') </l>
+<l>        decompose3(ImageSub, R, G, B)</l>
+<l>        trans_from_rgb(R, G, B, H, S, ImageSub, 'hsv')</l>
+<c>        *  无牙刷报错</c>
+<l>        if(CheckSide=0)</l>
+<c>            *正面</c>
+<l>            reduce_domain (ImageSub, Rectangle1, ImageNewROI_2)</l>
+<l>            threshold (ImageNewROI_2, ImageROITransRegion, 150, 255)</l>
+<c>            </c>
+<l>            intersection(CheckSide1_ROI, RectangleROI_2, DirtCheckROI)</l>
+<l>            copy_obj (RectangleROI_2,RectangleROIDiff_2, 1, -1)</l>
+<l>        else   </l>
+<c>            * 侧面(黑、白)</c>
+<c>            * 屏蔽金属块区域</c>
+<l>            gen_rectangle1 (ROI_1, RowMask1, ColumnMask1, RowMask2, ColumnMask2)</l>
+<l>            gen_rectangle1 (ROI_2,  RowMask3, ColumnMask3, RowMask4, ColumnMask4) </l>
+<l>            union2 (ROI_1, ROI_2, ROI_Union)</l>
+<c>            * 脏污检测ROI            </c>
+<l>            erosion_circle(CheckSide1_ROI, ROIErosion, 5)</l>
+<l>            opening_circle(ROIErosion, ROIErosion, 3.5)</l>
+<l>            erosion_rectangle1(ROIErosion, ROIErosion, 5, 20)</l>
+<l>            difference (ROIErosion , ROI_Union,  DirtCheckROI)</l>
+<l>            intersection(DirtCheckROI, Rectangle_2, DirtCheckROI)</l>
+<c>            * 长毛检测ROI</c>
+<l>            dilation_rectangle1 (CheckSide1_ROI, CheckSide1_ROIdilation, 10,25)</l>
+<l>            difference (RectangleROI_2, CheckSide1_ROIdilation,RectangleROIDiff_2)</l>
+<c>            </c>
+<c>            * 侧面无牙刷检测</c>
+<l>            difference (RectangleROI, ROI_Union, CheckROI1)</l>
+<c>            </c>
+<c>            </c>
+<l>            reduce_domain (ImageSub, CheckROI1, ImageReduced)</l>
+<c>            * 待确认是否使用自动阈值？</c>
+<l>            difference (Rectangle1, ROI_Union, CheckROI3)</l>
+<l>            reduce_domain (ImageSub, CheckROI3, ImageReduced2)</l>
+<l>            intensity (CheckROI3, ImageReduced2, Mean, Deviation)</l>
+<l>            threshValue := min2(Mean+40, 250)</l>
+<l>            threshold (ImageReduced2, ImageROITransRegion, threshValue, 255)</l>
+<l>        endif</l>
+<l>        area_center (ImageROITransRegion, ImageROITransArea, Row7, Column7)</l>
+<l>        if(CheckSide=0)</l>
+<l>            ToothBrush_ExistThresh := 15000</l>
+<l>        else</l>
+<l>            ToothBrush_ExistThresh := 58000</l>
+<l>        endif </l>
+<c>        </c>
+<l>        if( ImageROITransArea &gt; ToothBrush_ExistThresh)</l>
+<l>             Score:=[]</l>
+<l>        else</l>
+<l>            Score:=ScoreInput</l>
+<l>        endif</l>
+<l>    else</l>
+<l>         Score:=[]</l>
+<c></c>
+<l>    endif</l>
+<l>return ()</l>
+</body>
+<docu id="Toothbrush_Detection">
+<parameters>
+<parameter id="CheckROI1"/>
+<parameter id="CheckSide"/>
+<parameter id="CheckSide1_ROI"/>
+<parameter id="ColumnMask1"/>
+<parameter id="ColumnMask2"/>
+<parameter id="ColumnMask3"/>
+<parameter id="ColumnMask4"/>
+<parameter id="DirtCheckROI"/>
+<parameter id="ImageROITrans"/>
+<parameter id="ImageRectangleROI"/>
+<parameter id="ImageSub"/>
+<parameter id="Rectangle1"/>
+<parameter id="RectangleROI"/>
+<parameter id="RectangleROIDiff_2"/>
+<parameter id="RectangleROI_2"/>
+<parameter id="Rectangle_2"/>
+<parameter id="RowMask1"/>
+<parameter id="RowMask2"/>
+<parameter id="RowMask3"/>
+<parameter id="RowMask4"/>
+<parameter id="Score"/>
+<parameter id="ScoreInput"/>
+</parameters>
+</docu>
+</procedure>
+</hdevelop>

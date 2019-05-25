@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf_8"?>
+<root>
+    <arithmetic>
+        <AngleEnd>0.349066</AngleEnd>
+        <ScaleMin>0.9</ScaleMin>
+        <ScaleMax>1.1</ScaleMax>
+        <AngleStart>-0.349066</AngleStart>
+        <ToothBrushColor>0</ToothBrushColor>
+    </arithmetic>
+</root>

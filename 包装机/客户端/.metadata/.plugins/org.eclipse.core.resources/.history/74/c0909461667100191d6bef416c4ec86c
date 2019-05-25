@@ -1,0 +1,54 @@
+package com.sansan.toothbrush.machine.timer;
+
+import java.io.IOException;
+import java.util.List;
+import java.util.Map;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Component;
+
+import com.sansan.toothbrush.machine.repository.ExceedingProductionRepository;
+import com.sansan.toothbrush.machine.repository.PackProductionDataRepository;
+import com.sansan.toothbrush.machine.thread.SaveDataThread;
+
+
+/**
+ * @author Administrator
+ * 定时器类
+ */
+@Component
+public class Timer {
+	
+	@Autowired
+	private JdbcTemplate jdbcTemplate;
+	
+	@Autowired
+	private PackProductionDataRepository repository;
+	
+	@Autowired
+	private ExceedingProductionRepository EPRepository;
+	
+	@Scheduled(cron="0/1 * * * * ?")
+	public void SaveData() {
+		//定时器定时监控查看线程是否退出
+		String sql = "select id,ip,port,thread_state from ss_connect_info";
+		List<Map<String, Object>> address = jdbcTemplate.queryForList(sql);
+		//如果退出重新创建线程
+		for(Map<String, Object> as : address) {
+			System.out.println("");
+			if(as.get("thread_state").toString() == "false") {
+				try {
+					System.out.println("重新启动中，请稍后...");
+					new SaveDataThread(as, repository, jdbcTemplate,EPRepository).start();
+				} catch (Exception e) {
+					System.out.println(""+as.get("ip"));
+					System.out.println(as.get("port"));
+					System.out.println("重新连接失败！正在尝试再次启动...");
+				}
+			}
+		}
+		//如果没有退出则继续监控
+	}
+}

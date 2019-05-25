@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+    <camera>
+        <exposure_time>8000</exposure_time>
+        <gain>1</gain>
+        <channels>3</channels>
+    </camera>
+</root>

@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<hdevelop file_version="1.0" halcon_version="10.0" cs="416063145">
+<procedure name="PlaceCorrect">
+<interface>
+<io>
+<par name="ImageROI"/>
+</io>
+<oo>
+<par name="ImageROITrans"/>
+</oo>
+<ic>
+<par name="ToothBrushColor"/>
+<par name="AngleStart"/>
+<par name="AngleEnd"/>
+<par name="ScaleMin"/>
+<par name="ScaleMax"/>
+<par name="RowOrigin"/>
+<par name="ColumnOrigin"/>
+<par name="ModelID"/>
+<par name="CheckSide"/>
+</ic>
+<oc>
+<par name="HomMat2D"/>
+<par name="Score"/>
+</oc>
+</interface>
+<body>
+<l>if(ToothBrushColor=1 and CheckSide=0)</l>
+<l>    min_score := 0.1</l>
+<l>    rgb1_to_gray (ImageROI, GrayImageNew)</l>
+<c>*    </c>
+<l>    GMin:=30</l>
+<l>    GMax:=200</l>
+<l>    Mult:=255/(GMax-GMin)</l>
+<l>    Add:=-Mult*GMin</l>
+<l>    scale_image (GrayImageNew, GrayImageNew, Mult, Add)</l>
+<c>*</c>
+<l>    emphasize (GrayImageNew, ImageEmphasizeNew, 15, 15, 45)</l>
+<l>    gray_closing_shape (ImageEmphasizeNew, ImageClosingNew, 11, 11, 'octagon')</l>
+<l>    gray_opening_shape (ImageClosingNew, ImageOpeningNew, 8, 8, 'octagon')</l>
+<c>********************************模板匹配    </c>
+<l>    find_ncc_model (ImageOpeningNew, ModelID, AngleStart, AngleEnd, min_score, 1, 0.5, 'true', 0, Row, Column, Angle, Score)</l>
+<l>else</l>
+<l>    rgb1_to_gray (ImageROI, GrayImageNew)</l>
+<l>    gray_closing_rect (GrayImageNew, ImageClosing1, 21, 21)</l>
+<l>    gray_opening_shape (ImageClosing1, ImageROIOut, 21, 21, 'octagon')</l>
+<l>    min_score := 0.15</l>
+<l>    find_ncc_model (ImageROIOut, ModelID, AngleStart, AngleEnd, min_score, 1, 0.5, 'true', 0, Row, Column, Angle, Score)</l>
+<l>endif</l>
+<c></c>
+<l>if(|Score|&gt;0)</l>
+<l>    vector_angle_to_rigid ( Row, Column, Angle, RowOrigin, ColumnOrigin, 0, HomMat2D)</l>
+<l>    affine_trans_image (ImageROI, ImageROITrans, HomMat2D, 'constant', 'false')</l>
+<c>*    </c>
+<l>    if(ToothBrushColor=1 and CheckSide=0)    </l>
+<l>        GMin:=30</l>
+<l>        GMax:=200</l>
+<l>        Mult:=255/(GMax-GMin)</l>
+<l>        Add:=-Mult*GMin</l>
+<l>        scale_image (ImageROITrans, ImageROITrans, Mult, Add)</l>
+<l>    endif</l>
+<c>*  </c>
+<l>else</l>
+<l>    gen_empty_obj (ImageROITrans)</l>
+<l>    gen_empty_obj (OpeningImageROITrans)</l>
+<l>endif</l>
+<l>return ()</l>
+</body>
+<docu id="PlaceCorrect">
+<parameters>
+<parameter id="AngleEnd"/>
+<parameter id="AngleStart"/>
+<parameter id="CheckSide"/>
+<parameter id="ColumnOrigin"/>
+<parameter id="HomMat2D"/>
+<parameter id="ImageROI"/>
+<parameter id="ImageROITrans"/>
+<parameter id="ModelID"/>
+<parameter id="RowOrigin"/>
+<parameter id="ScaleMax"/>
+<parameter id="ScaleMin"/>
+<parameter id="Score"/>
+<parameter id="ToothBrushColor"/>
+</parameters>
+</docu>
+</procedure>
+</hdevelop>

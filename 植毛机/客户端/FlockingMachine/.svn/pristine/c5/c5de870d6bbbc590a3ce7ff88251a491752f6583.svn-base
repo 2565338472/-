@@ -1,0 +1,530 @@
+// 全屏代码
+function fullScreen() {
+	var elem = document.documentElement;
+	if (elem.webkitRequestFullScreen) {
+		elem.webkitRequestFullScreen();
+	} else if (elem.mozRequestFullScreen) {
+		elem.mozRequestFullScreen();
+	} else if (elem.msRequestFullscreen) {
+		elem.msRequestFullscreen();
+	} else if (elem.requestFullScreen) {
+		elem.requestFullscreen();
+	} else {
+		notice.notice_show("浏览器不支持全屏API或已被禁用", null, null, null, true, true);
+	}
+}
+
+//退出全屏
+function exitFullScreen() {
+	var elem = document;
+	if (elem.webkitCancelFullScreen) {
+		elem.webkitCancelFullScreen();
+	} else if (elem.mozCancelFullScreen) {
+		elem.mozCancelFullScreen();
+	} else if (elem.cancelFullScreen) {
+		elem.cancelFullScreen();
+	} else if (document.msExitFullscreen) {
+		elem.msExitFullscreen();
+	} else if (elem.exitFullscreen) {
+		elem.exitFullscreen();
+	} else {
+		notice.notice_show("浏览器不支持全屏API或已被禁用", null, null, null, true, true);
+	}
+}
+//定时刷新方法
+//说明：
+//		定时发送请求到后端获取数据并动态加载
+function TimeRefresh() {
+console.log("刷新");
+	$.ajax({
+		url:"ProductionData/findAll",
+		async:true,
+		success:function(d) {
+			
+			if(d.code===200) {
+				var data = d.data;
+				if(data.length>0){
+					var html = "";
+					
+					$(data).each(function(i, v) {
+						console.log(v);
+						console.log("打印");
+						html += "<tr id='"+v.id+"'>" + 
+						"<td>" + v.name + "</td>" +//机器名称
+						"<td>" + v.ok + "</td>" +//合格数量
+						"<td>" + v.oweHole + "</td>" +//欠孔数量
+						"<td>" + v.longHair + "</td>" +//长毛
+						"<td>" + v.looseWool + "</td>" +//散毛
+						"<td>" + v.longShortHair + "</td>" +//长短毛
+						"<td>" + v.dirty + "</td>" +//脏毛
+						"<td>" + v.implantationError + "</td>" +//错误植毛
+						"<td>" + v.differenceHair + "</td>" +//差毛
+						"<td>" + v.total + "</td>" +//总数
+						"<td>" + v.startTime + "</td>" +//开机时间
+						"<td>" + v.endTime + "</td>";//关机时间
+						
+					});
+					html += "<tr></tr>" +
+					"<tr></tr>" +
+					"<tr></tr>" +
+					"<tr></tr>" +
+					"<tr></tr>" +
+					"<tr></tr>" +
+					"<tr></tr>" +
+					"<tr></tr>" +
+					"<tr></tr>";
+					var realdata_table = document.getElementById('realdata_table'); 
+					var rowNum = realdata_table.rows.length; 
+					for (i = 1; i < rowNum; i++) { 
+						realdata_table.deleteRow(i); 
+                        rowNum = rowNum - 1; 
+                        i = i - 1; 
+                    } 
+					$("#realdata_table").append(html);
+				}
+			} else if(d.code === 401){
+				showNote(d.message);
+			}
+		}
+	});
+}
+
+
+
+//进入主页面
+function entryToMainPage(){
+	$(".header").removeClass("hide");
+	$(".main").removeClass("hide");
+	$("#container").hide().remove();
+}
+
+/*//开启客户端请求生产线监测数据监听
+function openDevRealDataRequest(){
+	var ws = new WebSocket(“ws://localhost:8080”);
+    // 当接收到消息。只能是事件名称是 message
+	ws.onmessage = function(event) {
+        var data = JSON.parse(event.data);
+        $("#allLineCount").text(data.length);
+        $("#workingCount").text($.grep(data, function(v,i){return v.status.name=="working"}).length);
+        $("#freeCount").text($.grep(data, function(v,i){return v.status.name=="free"}).length);
+        $("#errorCount").text($.grep(data, function(v,i){return v.status.name=="error"}).length);
+        $("#offlineCount").text($.grep(data, function(v,i){return v.status.name=="offline"}).length);
+        if(data.length>0){	
+        	var config = $("#setting_table").data("setting");
+        	var html = "";
+			$(data).each(function(i, v){
+				var setting = $.grep(config, function(v1, i) {
+					return v1.id == v.productionLineId;
+				});
+				if($.isArray(setting) && setting.length>0) {
+					setting = setting[0];
+				}
+				html += "<tr line_id='" + v.productionLineId + "'>"
+					+ "<td>" + v.productionLineName + "</td>"
+					+ "<td class='" +  v.status.name + "'>" + v.status.comment + "</td>"
+					+ "<td class='" + ((v.shapingTemp < setting.shapingTempMin || v.shapingTemp > setting.shapingTempMax)? "error" : "working") + "'>" + v.shapingTemp + "</td>"
+					+ "<td class='" + ((v.packingTemp < setting.packingTempMin || v.packingTemp > setting.packingTempMax)? "error" : "working") + "'>" + v.packingTemp + "</td>"
+					+ "<td class='" + ((v.verSealTemp < setting.verSealTempMin || v.verSealTemp > setting.verSealTempMax)? "error" : "working") + "'>" + v.verSealTemp + "</td>"
+					+ "<td class='" + ((v.horSealTemp < setting.horSealTempMin || v.horSealTemp > setting.horSealTempMax)? "error" : "working") + "'>" + v.horSealTemp + "</td>"
+					+ "<td class='" + ((v.packerSpeed > setting.runningSpeedMax)? "error" : "working") + "'>" + v.packerSpeed + "</td>"
+					+ "<td>" + v.onceQuantity + "</td>"
+					+ "<td class='warkingTime'>" + (v.startTime==null?"":v.startTime) + "</td>"
+					+ "<td class='warkingTime'>" + (v.endTime==null?"":v.endTime) + "</td>"
+					+ "</tr>";
+			});
+			$("#realdata_table >tbody").empty().append(html);
+        }
+    };
+    // 当错误发生
+    ws.onerror = function(event) {
+        console.log("连接错误！");
+        source.close();
+    };
+	
+}*/
+
+function showNote(msg){
+	$(".note_dialog").html(msg).show();
+	setTimeout(function(){
+		$(".note_dialog").hide();
+	},2000);
+}
+
+//--------------------事件-------------------------
+
+//监控键盘F11按键事件
+document.addEventListener("keydown", function(e) {
+	var currKey = 0
+	//在FireFox或Opera中，隐藏的变量e是存在的，那么e||event返回e，如果在IE中，隐藏变量e是不存在，则返回event。
+	var e = e || event;
+	//IE中，只有keyCode属性，而FireFox中有which和charCode属性，Opera中有keyCode和which属性
+	var currKey = e.keyCode || e.which || e.charCode;
+	// 阻止F11键默认事件，用HTML5全屏API代替
+	if (e.keyCode===122) {
+		e.preventDefault()
+		var isfull = document.isFullScreen || document.mozIsFullScreen || document.webkitIsFullScreen;
+		if(isfull) {
+			exitFullScreen();
+		} else {
+			fullScreen();
+		}
+	} 
+}, false);
+
+//双击指示板事件
+$("#showPadIcon").on("dblclick", function(e){
+	var isfull = document.isFullScreen || document.mozIsFullScreen || document.webkitIsFullScreen;
+	if(isfull) {
+		exitFullScreen();
+	} else {
+		fullScreen();
+	}
+});
+
+//欢迎页进入按钮事件
+$("#entry_btn").on("click",function(){
+	entryToMainPage();
+	fullScreen();
+});
+
+//打开历史记录窗体按钮事件
+$("#devlog_win").on("click",function(){
+	$.get("/ProductionData/findByPageHistory",function(d){
+		if(d.code === 200){
+			$("#devlog_table tbody").empty();
+			var data = d.data;
+			var html = "";
+			$(data).each(function(i, v) {
+				console.log(v);
+				html += "<tr id='"+v.id+"'>" + 
+				"<td>" + v.name + "</td>" +//机器名称
+				"<td>" + v.state + "</td>" +//机器名称
+				"<td>" + v.ok + "</td>" +//合格数量
+				"<td>" + v.oweHole + "</td>" +//欠孔数量
+				"<td>" + v.longHair + "</td>" +//长毛
+				"<td>" + v.looseWool + "</td>" +//散毛
+				"<td>" + v.longShortHair + "</td>" +//长短毛
+				"<td>" + v.dirty + "</td>" +//脏毛
+				"<td>" + v.implantationError + "</td>" +//错误植毛
+				"<td>" + v.differenceHair + "</td>" +//差毛
+				"<td>" + v.total + "</td>" +//总数
+				"<td>" + v.startTime + "</td>" +//开机时间
+				"<td>" + v.endTime + "</td>";//关机时间
+			});
+			$("#devlog_table tbody").append(html);
+		}
+		$(".div_shade").show();
+		$(".devlog_window").show();
+		laydate.render({
+			  elem: '#time' //指定元素
+		});
+	});
+	
+});
+
+
+//打开登陆窗体的按钮事件
+$("#login_win").on("click",function(){
+	$(".div_shade").show();
+	$(".login_window").show();
+});
+
+//登录按钮事件
+$("#login").on("click",function(e){
+	var p = {};
+	p.userName = $("#userName").val();
+	p.password = $("#password").val();
+	$.ajax({
+		url:"/login",
+		type:"POST",
+		data:p,
+		success:function(d){
+			if(d.message){
+				$(".div_shade").hide();
+				$(".login_window").hide();
+				$("#username").attr("disabled",true);
+				$("#password").attr("disabled",true);
+				$("#login").attr("disabled",true);
+				$("#logout").attr("disabled",false);
+				showNote(d.message);
+			}
+		}
+	});
+});
+
+//注销按钮事件
+$("#logout").on("click",function(e){
+	if (confirm("您确定要注销登录吗？")){
+		$.get("/logout",function(d){
+			$(".div_shade").hide();
+			$(".login_window").hide();
+			if(d.code === 200){
+				$("#username").attr("disabled",false);
+				$("#password").attr("disabled",false).val("");
+				$("#login").attr("disabled",false);
+				$("#logout").attr("disabled",true);
+				showNote("成功注销登录!");
+			}
+		});
+	}
+});
+
+//打开修改密码窗体的按钮事件
+$("#modifyPwd_win").on("click",function(){
+	$(".div_shade").show();
+	$(".modifyPwd_window").show();
+});
+
+//修改密码按钮事件
+$("#modifyPwd").on("click",function(){
+	var p = {};
+	p.psw = $("#current_PSW").val();
+	p.newpsw = $("#new_PSW").val();
+	var repeat = $("#repeat_PSW").val();
+	if(repeat != p.newpsw){
+		alert("新密码和确认密码不匹配，新重新填写！");
+		return;
+	}
+	$.post("/modifypsw",p,function(d){
+		if(d.message){
+			if(d.code===200){
+				$("#current_PSW").val("");
+				$("#new_PSW").val("");
+				$("#repeat_PSW").val("");
+				$(".div_shade").hide();
+				$(".modifyPwd_window").hide();
+			}
+			showNote(d.message);
+		}
+	});
+});
+
+$("#time_query").on("click",function(){
+	var time = $("input[id='time']").val();
+	$.get("/ProductionData/findByPageHistory","time="+time,function(d){
+		if(d.code === 200){
+			$("#devlog_table tbody").empty();
+			var data = d.data;
+			var html = "";
+			$(data).each(function(i, v) {
+				console.log(v);
+				html += "<tr id='"+v.id+"'>" + 
+				"<td>" + v.name + "</td>" +//机器名称
+				"<td>" + v.ok + "</td>" +//合格数量
+				"<td>" + v.oweHole + "</td>" +//欠孔数量
+				"<td>" + v.longHair + "</td>" +//长毛
+				"<td>" + v.looseWool + "</td>" +//散毛
+				"<td>" + v.longShortHair + "</td>" +//长短毛
+				"<td>" + v.dirty + "</td>" +//脏毛
+				"<td>" + v.implantationError + "</td>" +//错误植毛
+				"<td>" + v.differenceHair + "</td>" +//差毛
+				"<td>" + v.total + "</td>" +//总数
+				"<td>" + v.startTime + "</td>" +//开机时间
+				"<td>" + v.endTime + "</td>";//关机时间
+			});
+			$("#devlog_table tbody").append(html);
+		}
+	})
+});
+
+//打开参数配置窗体的按钮事件
+$("#setting_win").on("click",function(){
+	$.ajax({
+		url:"/config/list",
+		async:true,
+		success:function(d) {
+			if(d.code===200) {
+				$(".div_shade").show();
+				$(".setting_window").show();
+				var data = d.data;
+				$("#setting_table >tbody").empty();
+				if(data.length>0){
+					$("#setting_table").data("setting", data);
+					var html = "";
+					$(data).each(function(i, v) {
+						html += "<tr line_id='" + v.id + "' >" + 
+						"<td><input class='server_name'readonly='readonly' type='text' value='" + v.name + "' /></td>" +
+						"<td><input class='server_ip' type='text' value='" + v.ip + "' /></td>" +
+						"<td><input class='server_port' type='text' value='" + v.port + "' /></td>" +
+						"</tr>";
+					});
+					$("#setting_table >tbody").append(html);
+				}
+			} else if(d.code === 401){
+				showNote(d.message);
+			}
+		}
+	});
+});
+
+//配置保存的按钮事件
+$("#setting_save").on("click",function(e){
+	var list = [];
+	var modifySuccess = 0;
+	var callback = [];
+	$("#setting_table >tbody >tr").each(function(i, v){
+		var postData = {};
+		console.log($(v).find("input.server_port").val());
+		postData.id = $(v).attr("line_id");
+		postData.name = $(v).find("server_name").val();
+		postData.port = $(v).find("input.server_port").val();
+		postData.ip = $(v).find("input.server_ip").val();
+		
+		$.ajax({
+			url: "/config/modify",
+            type: "post",
+            data: JSON.stringify(postData),
+            contentType: "application/json",
+            success: function (d) {
+            	list.push(d.data);
+				modifySuccess++;
+				callback.push(1);
+				if(callback.length == $("#setting_table >tbody >tr").length){
+					$("#setting_table").data("setting", list);
+					$(".div_shade").hide();
+					$(".setting_window").hide();
+					showNote("保存成功");
+				}
+            },
+		});
+	});
+	return;
+});
+
+//窗体通用的“取消”按钮事件
+$(".window_footer button.cancel").on("click",function(e){
+	$(".div_shade").hide();
+	$(e.target).closest(".window").hide();
+});
+
+//窗体通用的“关闭”按钮事件
+$(".close_window").on("click",function(e){
+	$(".div_shade").hide();
+	$(e.target).closest(".window").hide();
+});
+
+//退出页面的按钮事件
+$("#exit").on("click",function(){
+	if (confirm("您确定要关闭本页吗？")){
+		$.get("/logout",function(e){});
+		window.opener=null;
+		window.open('','_self');
+		window.close();
+		window.location.href="about:blank";
+		window.close();
+	}
+});
+
+//打印表格
+var idTmr;
+
+function getExplorer() {
+    var explorer = window.navigator.userAgent;
+    //ie  
+    if(explorer.indexOf("MSIE") >= 0) {
+        return 'ie';
+    }
+    //firefox  
+    else if(explorer.indexOf("Firefox") >= 0) {
+        return 'Firefox';
+    }
+    //Chrome  
+    else if(explorer.indexOf("Chrome") >= 0) {
+        return 'Chrome';
+    }
+    //Opera  
+    else if(explorer.indexOf("Opera") >= 0) {
+        return 'Opera';
+    }
+    //Safari  
+    else if(explorer.indexOf("Safari") >= 0) {
+        return 'Safari';
+    }
+}
+
+function method5(tableid) {
+    if(getExplorer() == 'ie') {
+        var curTbl = document.getElementById(tableid);
+        var oXL = new ActiveXObject("Excel.Application");
+        var oWB = oXL.Workbooks.Add();
+        var xlsheet = oWB.Worksheets(1);
+        var sel = document.body.createTextRange();
+        sel.moveToElementText(curTbl);
+        sel.select();
+        sel.execCommand("Copy");
+        xlsheet.Paste();
+        oXL.Visible = true;
+
+        try {
+            var fname = oXL.Application.GetSaveAsFilename("Excel.xls",
+                "Excel Spreadsheets (*.xls), *.xls");
+        } catch(e) {
+            print("Nested catch caught " + e);
+        } finally {
+            oWB.SaveAs(fname);
+            oWB.Close(savechanges = false);
+            oXL.Quit();
+            oXL = null;
+            idTmr = window.setInterval("Cleanup();", 1);
+        }
+
+    } else {
+        tableToExcel(tableid)
+    }
+}
+
+function Cleanup() {
+    window.clearInterval(idTmr);
+    CollectGarbage();
+}
+var tableToExcel = (function() {
+    var uri = 'data:application/vnd.ms-excel;base64,',
+        template = '<html><head><meta charset="UTF-8"></head><body><table  border="1">{table}</table></body></html>',
+        base64 = function(
+            s) {
+            return window.btoa(unescape(encodeURIComponent(s)))
+        },
+        format = function(s, c) {
+            return s.replace(/{(\w+)}/g, function(m, p) {
+                return c[p];
+            })
+        }
+    return function(table, name) {
+        if(!table.nodeType)
+            table = document.getElementById(table)
+        var ctx = {
+            worksheet: name || 'Worksheet',
+            table: table.innerHTML
+        }
+        window.location.href = uri + base64(format(template, ctx))
+    }
+})()
+
+//获取当前日期
+function CurentTime()
+{ 
+    var now = new Date();
+   
+    var year = now.getFullYear();       //年
+    var month = now.getMonth() + 1;     //月
+    var day = now.getDate();            //日
+   
+    var hh = now.getHours();            //时
+    var mm = now.getMinutes();          //分
+   
+    var clock = year + "/";
+   
+    if(month < 10)
+        clock += "0";
+   
+    clock += month + "/";
+   
+    if(day < 10)
+        clock += "0";
+       
+    clock += day;
+    return(clock); 
+} 
+
+//日期选择插件
+    

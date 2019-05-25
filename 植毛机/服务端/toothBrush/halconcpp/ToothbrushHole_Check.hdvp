@@ -1,0 +1,215 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<hdevelop file_version="1.0" halcon_version="10.0" cs="350180682">
+<procedure name="ToothbrushHole_Check">
+<interface>
+<io>
+<par name="ImageSub"/>
+<par name="ImageROITrans"/>
+<par name="RectangleROIDiff_2"/>
+<par name="HoleCircleDilated"/>
+</io>
+<oo>
+<par name="ToothbrushHoleRegion"/>
+</oo>
+<ic>
+<par name="HoleThreshold_min"/>
+<par name="HoleArea_Min"/>
+<par name="Hole_Radius"/>
+<par name="Hole_Circularity"/>
+<par name="CheckSide"/>
+<par name="ToothBrushColor"/>
+<par name="MovedNum"/>
+</ic>
+</interface>
+<body>
+<c>*欠孔算法*</c>
+<l>if(ToothBrushColor=1)</l>
+<l>    rgb1_to_gray (ImageROITrans, GrayImageNew)</l>
+<l>    emphasize (GrayImageNew, ImageEmphasizeNew, 15, 15, 15)</l>
+<l>    gray_closing_shape (ImageEmphasizeNew, ImageClosingNew, 11, 11, 'octagon')</l>
+<l>    gray_opening_shape (ImageClosingNew, ImageOpeningNew, 8, 8, 'octagon')</l>
+<c>    </c>
+<l>*        HoleThreshold_min := 200</l>
+<l>*        HoleArea_Min := 360</l>
+<c>        ********************************处理欠孔</c>
+<l>    count_obj (HoleCircleDilated, Number)</l>
+<l>        gen_empty_obj (ObjectsConcat)</l>
+<l>        for Index1 := 1 to Number by 1</l>
+<l>        select_obj (HoleCircleDilated, CircleSelect, Index1)</l>
+<l>            area_center (CircleSelect, Area3, Row6, Column6)</l>
+<l>            reduce_domain (ImageOpeningNew, CircleSelect, ImageReduced1)   </l>
+<l>            threshold (ImageReduced1, Regions1, HoleThreshold_min, 255)</l>
+<l>            area_center (Regions1, Area2, Row5, Column5)</l>
+<l>            IntersectionArea:=0.6</l>
+<l>            if (real(Area2)/real(Area3) &lt; IntersectionArea)</l>
+<l>                closing_circle (Regions1, RegionCircle, 4)</l>
+<l>                fill_up(RegionCircle, RegionFillUp)</l>
+<c>                </c>
+<l>                select_shape (RegionFillUp, SelectedRegions1, ['inner_radius','area'], 'and', [0,0], [Hole_Radius*2, HoleArea_Min])</l>
+<l>                count_obj (SelectedRegions1, Number1)</l>
+<l>                if((Number1=1) or Area2 = 0)</l>
+<c>                    ***********</c>
+<l>                    move_region (CircleSelect, RegionMoved, MovedNum, 0)</l>
+<l>                    reduce_domain (ImageOpeningNew, RegionMoved, ImageReduced1)   </l>
+<l>                    threshold (ImageReduced1, Regions1, HoleThreshold_min, 255)</l>
+<l>                    area_center (Regions1, Area2, Row5, Column5)</l>
+<l>                    IntersectionArea:=0.6</l>
+<l>                    if (real(Area2)/real(Area3) &lt; IntersectionArea)</l>
+<l>                        closing_circle (Regions1, RegionCircle, 4)</l>
+<l>                        fill_up(RegionCircle, RegionFillUp)</l>
+<l>                        select_shape (RegionFillUp, SelectedRegions1, ['inner_radius','area'], 'and', [0,0], [Hole_Radius*2, HoleArea_Min])</l>
+<l>                        count_obj (SelectedRegions1, Number1)</l>
+<c>                        ******</c>
+<l>                        if((Number1=1) or Area2 = 0)</l>
+<l>                            shape_trans(CircleSelect, Circle1, 'outer_circle')</l>
+<l>                            concat_obj (Circle1, ObjectsConcat, ObjectsConcat)  </l>
+<l>                        endif</l>
+<l>                    endif</l>
+<l>*                     shape_trans(CircleSelect, Circle1, 'outer_circle')</l>
+<l>*                     concat_obj (Circle1, ObjectsConcat, ObjectsConcat)  </l>
+<l>                endif</l>
+<l>            endif</l>
+<l>        endfor</l>
+<l>        union1 (ObjectsConcat, ToothbrushHoleRegion)</l>
+<l>*     threshold (ImageSub, Region, HoleThreshold_min, 255)</l>
+<l>*     opening_circle(Region, RegionOpening, 5)</l>
+<l>*     connection (RegionOpening, ConnectedRegions)</l>
+<l>*     select_shape (ConnectedRegions, ToothbrushHoleRegion1, ['area','circularity','inner_radius'], 'and', [HoleArea_Min/2, Hole_Circularity, Hole_Radius/2], [HoleArea_Min*20, 1, Hole_Radius*2])</l>
+<l>*     select_shape(ConnectedRegions, ToothbrushHoleRegion2,  ['area','circularity','inner_radius'], 'and', [HoleArea_Min*2, Hole_Circularity/3, Hole_Radius/2], [HoleArea_Min*20, 1, Hole_Radius*2])</l>
+<l>*     union2 (ToothbrushHoleRegion1, ToothbrushHoleRegion2, ToothbrushHoleRegion)</l>
+<l>*     area_center(ToothbrushHoleRegion2, Area1, Row1, Column1)</l>
+<l>elseif(ToothBrushColor=0)</l>
+<l>*     gen_empty_region (ToothbrushHoleRegion)</l>
+<l>*     decompose3(ImageROITrans, R, G, B)</l>
+<l>*     trans_from_rgb(R, G, B, H, S, V, 'hsv')</l>
+<l>*     emphasize(V, emphasizeV, 20, 15, 1)</l>
+<c>    ***** 新增</c>
+<l>*     threshold(emphasizeV, RegionROI, 50, 240)</l>
+<l>*     fill_up(RegionROI, RegionBlack)</l>
+<l>*     difference (RegionBlack, RegionROI, RegionBlackDark)</l>
+<l>*     intensity (RegionROI, emphasizeV, ForegroundGBlack, DeviationFG)</l>
+<l>*     intensity (RegionBlackDark, emphasizeV, BackgroundGBlack, DeviationBG)</l>
+<c>    </c>
+<l>*     threshold(emphasizeV, RegionROILight, 50, 255)</l>
+<l>*     difference(RegionROILight, RegionBlack, RegionLightROI)</l>
+<l>*     fill_up(RegionLightROI, RegionLight)</l>
+<l>*     difference(RegionLight, RegionLightROI, RegionLightDark)</l>
+<l>*     intensity (RegionLightROI, emphasizeV, ForegroundGVal, DeviationFG)</l>
+<l>*     intensity (RegionLightDark, emphasizeV, BackgroundGVal, DeviationBG)</l>
+<l>*     Mult :=(ForegroundGVal - BackgroundGVal) /  (ForegroundGBlack - BackgroundGBlack) </l>
+<l>*     Add := ForegroundGVal - Mult * ForegroundGBlack</l>
+<l>*     reduce_domain(emphasizeV, RegionBlack, ImageReduced)</l>
+<l>*     scale_image (emphasizeV, ImageScaled, Mult, Add)</l>
+<l>*     add_image(ImageScaled, emphasizeV, ImageResult1, 0.5, 0)</l>
+<c>    *****    </c>
+<c>    </c>
+<l>*     threshold (emphasizeV, Region1, 40, 240)</l>
+<l>*     difference (Region1, RegionLightDark, RegionDifference)</l>
+<l>*     paint_region (Region1, emphasizeV, ImageResult3, 255, 'fill')</l>
+<l>*     paint_region (RegionLightDark, ImageResult3, ImageResult4, 0, 'fill')</l>
+<c>    </c>
+<l>*     reduce_domain (emphasizeV, Region1, ImageReduced)</l>
+<l>*     gmin:=0</l>
+<l>*     gmax:=50</l>
+<l>*     multi:=255.0/(gmax-gmin)</l>
+<l>*     add:=-multi * gmin</l>
+<l>*     scale_image (ImageReduced, ImageScaled1, multi, add)</l>
+<l>*     mult_image (emphasizeV,ImageScaled1,  ImageResult2, 0.01, 0)</l>
+<c>    ***全选   </c>
+<l>*     edges_color_sub_pix(emphasizeV, Edges, 'canny', 5, 15, 30)</l>
+<l>*     select_contours_xld(Edges, Edges, 'contour_length', 25, 500, -0.5, 0.5)</l>
+<l>*     segment_contours_xld(Edges, ContoursSplit, 'lines_ellipses', 1,1,1)</l>
+<l>*     union_cotangential_contours_xld (ContoursSplit, UnionContours,3, 30, rad(135), 10, 9, 25, 'attr_forget')</l>
+<l>*     select_shape_xld(UnionContours, SelectedXLD, ['circularity','contlength'], 'and', [0.5,100], [1,420])</l>
+<l>*     circularity_xld(SelectedXLD, Circularity)</l>
+<l>*     gen_region_contour_xld (SelectedXLD, ToothbrushHoleRegion, 'filled')</l>
+<l>*     shape_trans (ToothbrushHoleRegion, ToothbrushHoleRegion, 'convex')</l>
+<l>*     connection (ToothbrushHoleRegion, ToothbrushHead)</l>
+<l>*     select_shape (ToothbrushHead, ToothbrushHeadOther, ['area','circularity','inner_radius'], 'and', [HoleArea_Min, Hole_Circularity/5*4.0, Hole_Radius/2], [4000, 1, 40])</l>
+<c>    ***Mine</c>
+<l>    gen_empty_region (ToothbrushHoleRegion)</l>
+<l>    decompose3(ImageROITrans, R, G, B)</l>
+<l>    trans_from_rgb(R, G, B, H, S, V, 'hsv')</l>
+<l>    emphasize(V, emphasizeV, 10, 10, 1)</l>
+<l>    reduce_domain (emphasizeV, RectangleROIDiff_2, emphasizeVReduce)</l>
+<l>    edges_color_sub_pix(emphasizeVReduce, Edges, 'canny',2.4, 60, 100)</l>
+<l>    union_cotangential_contours_xld (Edges, UnionContours, 0, 30, rad(135), 25, 10, 2, 'attr_forget')</l>
+<l>*     union_cocircular_contours_xld (Edges, UnionContours, rad(60), 20, 0.3, 55, 20, 10, 'true', 1)</l>
+<l>    select_shape_xld(UnionContours, SelectedXLD, ['circularity','contlength'], 'and', [Hole_Circularity,100], [1,220])</l>
+<l>    circularity_xld(SelectedXLD, Circularity)</l>
+<l>    gen_region_contour_xld (SelectedXLD, ToothbrushHoleRegion, 'filled')</l>
+<l>    shape_trans (ToothbrushHoleRegion, ToothbrushHoleRegion, 'convex')</l>
+<l>    gmin:=10</l>
+<l>    gmax:=130</l>
+<l>    multi:=255.0/(gmax-gmin)</l>
+<l>    add:=-multi * gmin</l>
+<l>    scale_image (emphasizeV, ImageScaled, multi, add)</l>
+<c>    </c>
+<l>    invert_image(emphasizeV,ImageInvert1) </l>
+<l>    mult_image(ImageInvert1, ImageInvert1, ImageResult,0.005, -5)</l>
+<l>    reduce_domain (ImageResult,RectangleROIDiff_2, ImageResult)</l>
+<l>    hysteresis_threshold (ImageResult, RegionHysteresis1, 230, 255, 100)</l>
+<l>    opening_circle (RegionHysteresis1, RegionOpening1, 1.5)</l>
+<l>    closing_circle (RegionOpening1, RegionClosing, 2)</l>
+<l>    connection (RegionClosing, ConnectedRegions1)</l>
+<l>    fill_up (ConnectedRegions1, RegionFillUp)</l>
+<l>    select_shape (RegionFillUp, SelectedRegions, ['circularity','area'], 'and', [Hole_Circularity,HoleArea_Min*3.75], [1,HoleArea_Min*5])</l>
+<l>    union1 (SelectedRegions, SelectedRegions)</l>
+<l>    union2 (SelectedRegions, ToothbrushHoleRegion, ToothbrushHoleRegion)</l>
+<c>    *后加</c>
+<l>    reduce_domain (ImageSub, RectangleROIDiff_2, ImageSub1)</l>
+<l>    hysteresis_threshold (ImageSub1, RegionHysteresis,140, 150, 1000)</l>
+<l>    connection(RegionHysteresis, ToothbrushHead)</l>
+<l>    select_shape (ToothbrushHead, ToothbrushHeadOther, ['area','circularity','inner_radius'], 'and', [HoleArea_Min, Hole_Circularity/5*5.3, Hole_Radius/2], [HoleArea_Min*3, Hole_Circularity*99, Hole_Radius*8])</l>
+<l>    intersection (ToothbrushHeadOther, RectangleROIDiff_2, RegionIntersection)</l>
+<l>    union2 (ToothbrushHoleRegion, RegionIntersection, ToothbrushHoleRegion)</l>
+<l>else</l>
+<l>*     HoleThreshold_min := 100</l>
+<l>*     HoleArea_Min := 200</l>
+<l>    rgb1_to_gray (ImageROITrans, GrayImage)</l>
+<l>    mean_image (GrayImage, ImageMean, 9, 9)</l>
+<c>    </c>
+<l>    gen_empty_obj (ObjectsConcat)</l>
+<l>    count_obj (HoleCircleDilated, Number)</l>
+<l>    for Index := 1 to Number by 1</l>
+<l>        select_obj (HoleCircleDilated, CircleSelect, Index)</l>
+<l>        reduce_domain (ImageMean, CircleSelect, ImageReduced)</l>
+<l>        threshold (ImageReduced, Region2, 0, HoleThreshold_min)</l>
+<l>        area_center (Region2, Area2, Row, Column)</l>
+<l>        area_center (CircleSelect, Area3, Row6, Column6)</l>
+<l>        IntersectionArea:=0.6</l>
+<l>        if (real(Area2)/real(Area3) &lt; IntersectionArea)</l>
+<l>            closing_circle (Region2, RegionCircle, 4)</l>
+<l>            fill_up(RegionCircle, RegionFillUp)</l>
+<c>            </c>
+<l>            select_shape (RegionFillUp, SelectedRegions1, ['inner_radius','area'], 'and', [0,0], [Hole_Radius*2, HoleArea_Min])</l>
+<l>            count_obj (SelectedRegions1, Number1)</l>
+<l>            if((Number1=1) or Area2 = 0)</l>
+<l>                shape_trans(CircleSelect, Circle1, 'outer_circle')</l>
+<l>                concat_obj (Circle1, ObjectsConcat, ObjectsConcat)  </l>
+<l>            endif</l>
+<l>        endif</l>
+<l>        union1 (ObjectsConcat, ToothbrushHoleRegion)       </l>
+<l>    endfor</l>
+<l>endif</l>
+<l>return ()</l>
+<c></c>
+</body>
+<docu id="ToothbrushHole_Check">
+<parameters>
+<parameter id="CheckSide"/>
+<parameter id="HoleArea_Min"/>
+<parameter id="HoleCircleDilated"/>
+<parameter id="HoleThreshold_min"/>
+<parameter id="Hole_Circularity"/>
+<parameter id="Hole_Radius"/>
+<parameter id="ImageROITrans"/>
+<parameter id="ImageSub"/>
+<parameter id="MovedNum"/>
+<parameter id="RectangleROIDiff_2"/>
+<parameter id="ToothBrushColor"/>
+<parameter id="ToothbrushHoleRegion"/>
+</parameters>
+</docu>
+</procedure>
+</hdevelop>

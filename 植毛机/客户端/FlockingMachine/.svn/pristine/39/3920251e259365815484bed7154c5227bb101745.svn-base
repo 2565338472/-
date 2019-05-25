@@ -1,0 +1,30 @@
+package com.sansan.toothbrush.machine.thread;
+
+import java.io.IOException;
+import java.io.InputStream;
+
+import net.sf.json.JSONObject;
+
+
+/**
+ * @author Administrator
+ * 保存数据的线程 暂时未启用，先保留如果需要再进行调用
+ */
+public class SaveDataThread extends Thread{
+	private InputStream in;
+
+    public SaveDataThread(InputStream in) {
+        this.in = in;
+    }
+    public void run() {
+        try {
+	        byte[] data=new byte[1024];
+	        int len=in.read(data);
+	        System.out.println(new String(data,0,len));
+	        JSONObject json = JSONObject.fromObject(new String(data,0,len));
+	        System.out.println(json.get("NG"));
+        } catch (IOException exc) {
+            exc.printStackTrace();
+        }
+    }
+}

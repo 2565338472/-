@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<hdevelop file_version="1.1" halcon_version="12.0.2">
+<procedure name="DirtCheck">
+<interface>
+<io>
+<par name="ImageSub" base_type="iconic" dimension="0"/>
+<par name="DirtCheckROI" base_type="iconic" dimension="0"/>
+<par name="RectangleROIDiff_2" base_type="iconic" dimension="0"/>
+</io>
+<oo>
+<par name="BlackDirtPointRegion" base_type="iconic" dimension="0"/>
+</oo>
+<ic>
+<par name="DirtArea_Min" base_type="ctrl" dimension="0"/>
+<par name="DirtAntiShake_Radius" base_type="ctrl" dimension="0"/>
+<par name="DirtAntiShake_Width" base_type="ctrl" dimension="0"/>
+<par name="CheckSide" base_type="ctrl" dimension="0"/>
+</ic>
+</interface>
+<body>
+<l>count_channels(ImageSub, Channels)</l>
+<l>if(Channels = 3)</l>
+<l>    rgb1_to_gray(ImageSub, ImageSub)</l>
+<l>endif</l>
+<c>        </c>
+<l>gen_disc_se (SE, 'byte', 12, 12, 0)</l>
+<l>gray_tophat (ImageSub, SE, ImageTopHat)</l>
+<l>gray_bothat(ImageSub, SE, ImageBotHat)  </l>
+<l>add_image(ImageSub, ImageTopHat, ImageTopHatAdd, 1, 0)</l>
+<l>sub_image(ImageTopHatAdd, ImageBotHat, ImageScale, 1, 0)   </l>
+<c></c>
+<l>if( CheckSide=0)</l>
+<l>    thresholdlow:=100</l>
+<l>else</l>
+<l>    thresholdlow:=170</l>
+<l>endif</l>
+<l>hysteresis_threshold(ImageScale, Region1, thresholdlow, 230, 1000)</l>
+<l>dilation_rectangle1(Region1, Region1Dilation, 4, 4)</l>
+<c></c>
+<c></c>
+<l>if(CheckSide=1)</l>
+<c>    * 检测侧面，用DirtCheckROI</c>
+<l>    erosion_circle(DirtCheckROI, DirtCheckROIErosion, 10)</l>
+<l>    IntersectionRatioThresh := 0.65</l>
+<l>else</l>
+<c>    * 检测正面，用RectangleROI_2</c>
+<l>    copy_obj (RectangleROIDiff_2, DirtCheckROIErosion, 1, -1)</l>
+<l>    erosion_circle (DirtCheckROIErosion, DirtCheckROIErosion, 5)</l>
+<l>    IntersectionRatioThresh := 0.5</l>
+<l>endif</l>
+<c></c>
+<l>connection(Region1Dilation, ConnectedRegions)</l>
+<l>select_shape(ConnectedRegions, ConnectedRegions, 'area', 'and', DirtArea_Min/3, DirtArea_Min*20)</l>
+<c></c>
+<c></c>
+<l>gen_empty_obj(BlackRegion_Error)</l>
+<l>count_obj(ConnectedRegions, Number)</l>
+<l>for Index := 1 to Number by 1</l>
+<l>    select_obj(ConnectedRegions, ObjectSelected, Index)</l>
+<l>    intersection(ObjectSelected, DirtCheckROIErosion, RegionIntersection)</l>
+<l>    area_center(RegionIntersection, Area, Row, Column)</l>
+<l>    area_center(ObjectSelected, ObjArea, Row, Column)</l>
+<c>    * 与 DirtCheckROI 的相交面积比大于0.5的选中。</c>
+<l>    if((real(Area)/real(ObjArea)) &gt; IntersectionRatioThresh)</l>
+<l>        if(CheckSide &gt; 0)</l>
+<c>            * 减除竖直区域，避免刷毛缝隙干扰</c>
+<l>            select_shape(ObjectSelected, SelectedRegions1, ['phi','area','struct_factor'], 'and', [rad(-110),DirtArea_Min,2], [rad(-70),DirtArea_Min*20,200])</l>
+<l>            select_shape(ObjectSelected, SelectedRegions2, ['phi','area','struct_factor'], 'and', [rad(70),DirtArea_Min,2], [rad(110),DirtArea_Min*20,200])</l>
+<l>            select_shape(ObjectSelected, SelectedRegions3, 'struct_factor', 'and', 8, 200)</l>
+<l>*             eccentricity(SelectedRegions1, Anisometry, Bulkiness, StructureFactor)</l>
+<l>            union2(SelectedRegions1, SelectedRegions2, RegionUnion)</l>
+<l>            union2(RegionUnion, SelectedRegions3, RegionUnion)</l>
+<l>            union1(RegionUnion, RegionUnion)</l>
+<l>            area_center(RegionUnion, RegionUnionArea, Row, Column)</l>
+<l>            if(RegionUnionArea &gt; 10)</l>
+<l>                continue</l>
+<l>            endif</l>
+<l>        endif</l>
+<l>        concat_obj(RegionIntersection, BlackRegion_Error, BlackRegion_Error)</l>
+<l>    endif</l>
+<l>endfor</l>
+<l>intersection(BlackRegion_Error, Region1, BlackRegion_Error)   </l>
+<c>* 检测较模糊脏污区域</c>
+<l>if(CheckSide=1)</l>
+<l>*     mult_image (ImageSub, ImageSub, ImageScale2, 0.018, 0)</l>
+<l>    copy_image (ImageSub, ImageScale2)</l>
+<l>else</l>
+<l>    copy_image (ImageSub, ImageScale2) </l>
+<l>endif</l>
+<c>        </c>
+<l>hysteresis_threshold(ImageScale2, Region2, 160, 230, 1000)</l>
+<c>* 增强后阈值分割结果Region2 与 之前Region1无交集的区域，认为是模糊脏污区域</c>
+<l>connection(Region2, Region2Connected)</l>
+<l>gen_empty_obj(BlackDirtPoint)</l>
+<c></c>
+<l>area_center(Region2Connected, Region2Area, Row, Column)</l>
+<l>Region2Number := |Region2Area|</l>
+<l>if (Region2Area = 0)</l>
+<l>    Region2Number := 0</l>
+<l>endif</l>
+<c></c>
+<l>for Index := 1 to Region2Number by 1</l>
+<l>    select_obj(Region2Connected, ObjectSelected, Index)</l>
+<l>    difference(Region1Dilation, BlackRegion_Error, Region1Dilation)</l>
+<l>    intersection(ObjectSelected, Region1Dilation, RegionIntersection)</l>
+<l>    area_center(RegionIntersection, Area, Row, Column)</l>
+<l>    area_center(ObjectSelected, ObjArea, Row, Column)</l>
+<c>    </c>
+<l>    intersection(ObjectSelected, DirtCheckROIErosion, ObjectInsideROI)</l>
+<l>    area_center(ObjectInsideROI, AreaInROI, Row, Column)</l>
+<c>    * 与 黑块 区域相交面积大于10的排除, 与脏污检测区域 DirtCheckROI 相交大于10留下</c>
+<l>    if((real(Area)/real(ObjArea)) &gt; 1-IntersectionRatioThresh)</l>
+<c>        </c>
+<l>    else</l>
+<l>        if((real(AreaInROI)/real(ObjArea)) &gt; IntersectionRatioThresh)</l>
+<l>      *  if(AreaInROI &gt; 10)</l>
+<l>             if(CheckSide &gt; 0)</l>
+<c>                * 减除竖直区域，避免刷毛缝隙干扰</c>
+<l>                select_shape(ObjectSelected, SelectedRegions1, ['phi','area','struct_factor'], 'and', [rad(-110),DirtArea_Min,2], [rad(-70),DirtArea_Min*20,200])</l>
+<l>                select_shape(ObjectSelected, SelectedRegions2, ['phi','area','struct_factor'], 'and', [rad(70),DirtArea_Min,2], [rad(110),DirtArea_Min*20,200])</l>
+<l>                select_shape(ObjectSelected, SelectedRegions3, 'struct_factor', 'and', 8, 200)</l>
+<l>                select_shape(ObjectSelected, SelectedRegions4, 'area', 'and', DirtArea_Min, DirtArea_Min + 500)</l>
+<l>*                 eccentricity(SelectedRegions1, Anisometry, Bulkiness, StructureFactor)</l>
+<l>                union2(SelectedRegions1, SelectedRegions2, RegionUnion)</l>
+<l>                union2(RegionUnion, SelectedRegions3, RegionUnion)</l>
+<l>                union2(RegionUnion, SelectedRegions4, RegionUnion)</l>
+<l>                union1(RegionUnion, RegionUnion)</l>
+<l>                area_center(RegionUnion, RegionUnionArea, Row, Column)</l>
+<l>                if(RegionUnionArea &gt; 10)</l>
+<l>                    continue</l>
+<l>                endif</l>
+<l>            endif</l>
+<l>*             concat_obj(RegionIntersection, BlackDirtPoint, BlackDirtPoint)</l>
+<l>            concat_obj(ObjectSelected, BlackDirtPoint, BlackDirtPoint)</l>
+<l>        endif</l>
+<l>    endif</l>
+<l>endfor</l>
+<c></c>
+<l>union2(BlackDirtPoint, BlackRegion_Error, BlackDirtPointRegion)</l>
+<l>connection (BlackDirtPointRegion, ConnectedRegions1)</l>
+<l>select_shape(ConnectedRegions1, BlackDirtPointRegion, ['area','struct_factor','inner_radius','width'], 'and', [DirtArea_Min, 0, DirtAntiShake_Radius, DirtAntiShake_Width], [DirtArea_Min*20, 4, DirtAntiShake_Radius*2500, DirtAntiShake_Width*670])</l>
+<l>eccentricity(BlackDirtPointRegion, Anisometry, Bulkiness, StructureFactor)  </l>
+<l>return ()</l>
+</body>
+<docu id="DirtCheck">
+<parameters>
+<parameter id="BlackDirtPointRegion"/>
+<parameter id="CheckSide"/>
+<parameter id="DirtAntiShake_Radius"/>
+<parameter id="DirtAntiShake_Width"/>
+<parameter id="DirtArea_Min"/>
+<parameter id="DirtCheckROI"/>
+<parameter id="ImageSub"/>
+<parameter id="RectangleROIDiff_2"/>
+</parameters>
+</docu>
+</procedure>
+</hdevelop>

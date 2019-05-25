@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<hdevelop file_version="1.0" halcon_version="10.0" cs="454800838">
+<procedure name="Toothbrush_Sanmao">
+<interface>
+<io>
+<par name="ImageSub"/>
+<par name="RectangleROIDiff_2"/>
+<par name="RectangleROI_3"/>
+<par name="ImageROITrans"/>
+</io>
+<oo>
+<par name="ToothbrushHairRegion"/>
+</oo>
+<ic>
+<par name="BrushHeadAreaMin"/>
+<par name="Sigma"/>
+<par name="BrushHeadLengthMin"/>
+<par name="BrushHeadLengthMax"/>
+</ic>
+</interface>
+<body>
+<l>    gen_empty_obj (ToothbrushHairRegion)</l>
+<l>    threshold(ImageSub, Region, 150, 255)</l>
+<l>    opening_circle(Region, RegionOpening, 10)</l>
+<l>    connection(  RegionOpening, ConnectedRegions1)</l>
+<l>    select_shape(ConnectedRegions1, LargeRegion, 'area', 'and', BrushHeadAreaMin, BrushHeadAreaMin*20)</l>
+<l>    gen_empty_obj(LargeRegion_Error)</l>
+<l>    count_obj(LargeRegion, Number)</l>
+<l>    for Index := 1 to Number by 1</l>
+<l>        select_obj(LargeRegion, ObjectSelected, Index)</l>
+<l>        intersection (ObjectSelected, RectangleROIDiff_2, RegionIntersection)</l>
+<l>        area_center(RegionIntersection, Area, Row, Column)</l>
+<l>        if(Area &gt; 50)</l>
+<l>            concat_obj(ObjectSelected, LargeRegion_Error, LargeRegion_Error)</l>
+<l>        endif</l>
+<l>    endfor</l>
+<l>    difference (RectangleROI_3, RectangleROIDiff_2, RegionDifference1)</l>
+<l>    reduce_domain (ImageROITrans, RegionDifference1, ImageReduced)</l>
+<l>    lines_gauss (ImageReduced, Lines, Sigma*2/3, 1, 8, 'light', 'true', 'bar-shaped', 'true')</l>
+<l>    select_contours_xld (Lines, SelectedContours, 'direction',rad(45), rad(135), 0, 0)</l>
+<l>    select_contours_xld (SelectedContours, SelectedContours, 'contour_length', BrushHeadLengthMin, BrushHeadLengthMax, -0.5, 0.5)</l>
+<l>    orientation_xld (Lines, Phi1)</l>
+<l>    gen_region_contour_xld (SelectedContours, ToothbrushHairRegion, 'filled')</l>
+<c>    </c>
+<l>*     union2(LargeRegion_Error, ToothbrushHairRegion, ToothbrushHairRegion)</l>
+<c>    </c>
+<l>return ()</l>
+</body>
+<docu id="Toothbrush_Sanmao">
+<parameters>
+<parameter id="BrushHeadAreaMin"/>
+<parameter id="BrushHeadLengthMax"/>
+<parameter id="BrushHeadLengthMin"/>
+<parameter id="ImageROITrans"/>
+<parameter id="ImageSub"/>
+<parameter id="RectangleROIDiff_2"/>
+<parameter id="RectangleROI_3"/>
+<parameter id="Sigma"/>
+<parameter id="ToothbrushHairRegion"/>
+</parameters>
+</docu>
+</procedure>
+</hdevelop>

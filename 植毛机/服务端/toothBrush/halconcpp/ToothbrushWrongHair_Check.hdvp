@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<hdevelop file_version="1.1" halcon_version="12.0.2">
+<procedure name="ToothbrushWrongHair_Check">
+<interface>
+<io>
+<par name="ImageSub" base_type="iconic" dimension="0"/>
+<par name="DirtCheckROI" base_type="iconic" dimension="0"/>
+</io>
+<oo>
+<par name="ToothbrushWrongHairRegion" base_type="iconic" dimension="0"/>
+</oo>
+<ic>
+<par name="WrongHairThresh_min" base_type="ctrl" dimension="0"/>
+<par name="WrongAreaMin" base_type="ctrl" dimension="0"/>
+<par name="WrongAreaMax" base_type="ctrl" dimension="0"/>
+<par name="WrongHeightMin" base_type="ctrl" dimension="0"/>
+<par name="WrongWidthMin" base_type="ctrl" dimension="0"/>
+<par name="WrongWidthMax" base_type="ctrl" dimension="0"/>
+</ic>
+</interface>
+<body>
+<l>get_domain (DirtCheckROI, Domain)</l>
+<l>opening_rectangle1 (Domain, RegionOpening1, 5, 20)</l>
+<l>mult_image (ImageSub, ImageSub, ImageSub, 0.02, 0)</l>
+<l>reduce_domain (ImageSub, RegionOpening1, ImageReduced)</l>
+<l>threshold (ImageReduced, Regions, WrongHairThresh_min, 255)</l>
+<l>opening_circle (Regions, RegionOpening, 5)</l>
+<l>opening_rectangle1 (RegionOpening, RegionOpening, 5, 70)</l>
+<l>connection (RegionOpening, ConnectedRegions)</l>
+<l>select_shape (ConnectedRegions, ToothbrushWrongHairRegion, ['area','height','width'], 'and',[ WrongAreaMin, WrongHeightMin,WrongWidthMin], [WrongAreaMax, WrongHeightMin*10,WrongWidthMax])</l>
+<l>return ()</l>
+</body>
+<docu id="ToothbrushWrongHair_Check">
+<parameters>
+<parameter id="DirtCheckROI"/>
+<parameter id="ImageSub"/>
+<parameter id="ToothbrushWrongHairRegion"/>
+<parameter id="WrongAreaMax"/>
+<parameter id="WrongAreaMin"/>
+<parameter id="WrongHairThresh_min"/>
+<parameter id="WrongHeightMin"/>
+<parameter id="WrongWidthMax"/>
+<parameter id="WrongWidthMin"/>
+</parameters>
+</docu>
+</procedure>
+</hdevelop>

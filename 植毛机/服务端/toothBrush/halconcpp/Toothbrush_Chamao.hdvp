@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<hdevelop file_version="1.0" halcon_version="10.0" cs="-25234880">
+<procedure name="Toothbrush_Chamao">
+<interface>
+<io>
+<par name="CheckROI1"/>
+<par name="ImageROITrans"/>
+<par name="Rectangle_2"/>
+<par name="ToothbrushHairRegion"/>
+</io>
+<oo>
+<par name="ToothbrushHairCrushRegion"/>
+</oo>
+<ic>
+<par name="BrushHairCrushMin"/>
+<par name="BrushHairCrushAngleMin"/>
+<par name="BrushHairCrushAngleMax"/>
+</ic>
+<oc>
+<par name="RegionMaxRow"/>
+<par name="RegionMinRow"/>
+</oc>
+</interface>
+<body>
+<l>    gen_empty_obj (ToothbrushHairCrushRegion)</l>
+<l>    copy_obj (ToothbrushHairRegion, ToothbrushHairRegionOut, 1, -1)</l>
+<l>    orientation_region (CheckROI1, Phi2)</l>
+<l>    gen_contour_region_xld (CheckROI1, Contours, 'border')</l>
+<l>    segment_contours_xld (Contours, ContoursSplit, 'lines_circles', 5, 4, 2) </l>
+<l>    length_xld (ContoursSplit, Length) </l>
+<l>    tuple_max (Length, Max) </l>
+<l>    tuple_min (Length, Min) </l>
+<l>    select_contours_xld (ContoursSplit, SelectedContours1, 'contour_length', 0.5, Min, -0.5, 0.5) </l>
+<l>    select_contours_xld (ContoursSplit, SelectedContours2, 'contour_length', Max, Max+1, -0.5, 0.5) </l>
+<l>    gen_region_contour_xld (SelectedContours1, RegionMin, 'filled') </l>
+<l>    gen_region_contour_xld (SelectedContours2, RegionMax, 'filled') </l>
+<l>    area_center (RegionMin, Area1, RegionMinRow, RegionMinColumn) </l>
+<l>    area_center (RegionMax, Area2, RegionMaxRow, RegionMaxColumn) </l>
+<l>    smallest_rectangle1 (CheckROI1, Row1, Column1, Row2, Column2) </l>
+<l>    if (RegionMinRow&gt;RegionMaxRow) </l>
+<l>        gen_rectangle1 (Rectangle, Row1, Column1, Row2-300, Column2) </l>
+<l>    else </l>
+<l>         gen_rectangle1 (Rectangle, Row1+350, Column1, Row2, Column2) </l>
+<l>    endif </l>
+<l>    difference (CheckROI1, Rectangle, CheckROI2) </l>
+<l>    reduce_domain (ImageROITrans, CheckROI2, ImageReduced1) </l>
+<c>    *选出检测区域&lt;/c&gt;</c>
+<l>    threshold (ImageReduced1, Regions, 0, 50) </l>
+<l>    connection (Regions, ConnectedRegions2) </l>
+<l>    select_shape (ConnectedRegions2, SelectedRegions, 'area', 'and', 1, 6000) </l>
+<l>    dilation_circle (SelectedRegions, RegionDilation, 15) </l>
+<l>    union1 (RegionDilation, RegionUnion)</l>
+<l>    intersection (RegionUnion, Rectangle_2, RegionIntersection2)</l>
+<l>    reduce_domain (ImageROITrans, RegionIntersection2, ImageReduced2) </l>
+<c>    *夹伤毛用line_gauss检测</c>
+<c>    *     calculate_lines_gauss_parameters (5, [15,10], Sigma1, BrushHair_measure_Low1, BrushHair_measure_High1) </c>
+<l>    lines_gauss (ImageReduced2, Lines, 1.44338, 1.48013, 2.2202, 'light', 'true', 'parabolic', 'true') </l>
+<l>    select_contours_xld (Lines, Lines, 'contour_length', BrushHairCrushMin, BrushHairCrushMin*100, -0.5, 0.5) </l>
+<l>    union_adjacent_contours_xld (Lines, Lines, 2, 1, 'attr_keep') </l>
+<l>    gen_region_contour_xld (Lines, Region1, 'filled') </l>
+<l>    skeleton (Region1, Skeleton) </l>
+<l>    orientation_region (Skeleton, Phi) </l>
+<c>    *用角度选择夹角较大的刷毛</c>
+<l>    select_shape (Skeleton, SelectedXLD1, 'orientation', 'and',rad(BrushHairCrushAngleMin),rad(BrushHairCrushAngleMax)) </l>
+<l>    select_shape (Skeleton, SelectedXLD2, 'orientation', 'and',rad(180-BrushHairCrushAngleMax),rad(180-BrushHairCrushAngleMin)) </l>
+<l>    select_shape (Skeleton, SelectedXLD3, 'orientation', 'and',-rad(BrushHairCrushAngleMax),-rad(BrushHairCrushAngleMin)) </l>
+<l>    select_shape (Skeleton, SelectedXLD4, 'orientation', 'and',-rad(180-BrushHairCrushAngleMin),-rad(180-BrushHairCrushAngleMax)) </l>
+<l>    union2 (SelectedXLD1, SelectedXLD2, RegionUnion1) </l>
+<l>    union2 (SelectedXLD3, SelectedXLD4, RegionUnion2) </l>
+<l>    union2 (RegionUnion1, RegionUnion2, ToothbrushHairCrushRegion) </l>
+<c>    *********************增加叉毛上移下移再检测一遍是否与空隙有交集*******************</c>
+<l>    gen_empty_obj (ObjectsConcat)</l>
+<l>    gen_empty_obj (ObjectsConcat2)</l>
+<l>    concat_obj (SelectedXLD1, ObjectsConcat, ObjectsConcat)</l>
+<l>    concat_obj (SelectedXLD2, ObjectsConcat, ObjectsConcat)</l>
+<l>    concat_obj (SelectedXLD3, ObjectsConcat, ObjectsConcat)</l>
+<l>    concat_obj (SelectedXLD4, ObjectsConcat, ObjectsConcat)</l>
+<l>    area_center (ObjectsConcat, Area, Row, Column)</l>
+<l>    count_obj (ObjectsConcat, Number)</l>
+<l>    for Index1 := 0 to Number-1 by 1</l>
+<l>        select_obj (ObjectsConcat, ObjectSelected, Index1+1)</l>
+<l>        move_region (ObjectSelected, RegionMoved1, -15, 0)</l>
+<l>        rgb1_to_gray (ImageReduced2, GrayImage)</l>
+<l>        reduce_domain (GrayImage, RegionMoved1, ImageReduced)</l>
+<l>        intensity (RegionMoved1, ImageReduced, Mean1, Deviation1)</l>
+<c>        </c>
+<l>        move_region (ObjectSelected, RegionMoved2, 15, 0)</l>
+<l>        reduce_domain (GrayImage, RegionMoved2, ImageReduced)</l>
+<l>        intensity (RegionMoved2, ImageReduced, Mean2, Deviation2)</l>
+<c>        </c>
+<l>        if (Mean1&lt;150 and Mean2&lt;150)</l>
+<l>            concat_obj (ObjectSelected, ObjectsConcat2, ObjectsConcat2)</l>
+<l>        endif</l>
+<l>    endfor</l>
+<l>    dilation_circle (ObjectsConcat2, ToothbrushHairCrushRegion, 25)</l>
+<c>    </c>
+<l>* union2 (ToothbrushHairRegionOut, RegionUnion2, ToothbrushHairRegionOut)</l>
+<l>return ()</l>
+</body>
+<docu id="Toothbrush_Chamao">
+<parameters>
+<parameter id="BrushHairCrushAngleMax"/>
+<parameter id="BrushHairCrushAngleMin"/>
+<parameter id="BrushHairCrushMin"/>
+<parameter id="CheckROI1"/>
+<parameter id="ImageROITrans"/>
+<parameter id="Rectangle_2"/>
+<parameter id="RegionMaxRow"/>
+<parameter id="RegionMinRow"/>
+<parameter id="ToothbrushHairCrushRegion"/>
+<parameter id="ToothbrushHairRegion"/>
+</parameters>
+</docu>
+</procedure>
+</hdevelop>

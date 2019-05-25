@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Common>
+    <CameraCommon>
+        <camera1>00305325465C</camera1>
+        <camera2>003053254664</camera2>
+        <camera3>003053255F7B</camera3>
+        <saveAllImage>0</saveAllImage>
+	    <saveErrImage>1</saveErrImage>
+        <passWord>e10adc3949ba59abbe56e057f20f883e</passWord>
+        <continuousNG>30</continuousNG>
+        <cameraDir>./camera</cameraDir>
+        <cameraDll>basler.dll</cameraDll>
+        <imageBayer>BGR</imageBayer>
+    </CameraCommon>
+</Common>

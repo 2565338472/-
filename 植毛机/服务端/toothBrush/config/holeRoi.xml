@@ -1,0 +1,188 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+    <roi type="5" enable="1" rgb="4278255360" name="s0" visible="1">
+        <value name="圆心X值">1518</value>
+        <value name="圆心Y值">697</value>
+        <value name="半径">25</value>
+    </roi>
+    <roi type="5" enable="1" rgb="4278255360" name="s1" visible="1">
+        <value name="圆心X值">1520</value>
+        <value name="圆心Y值">788</value>
+        <value name="半径">25</value>
+    </roi>
+    <roi type="5" enable="1" rgb="4278255360" name="s2" visible="1">
+        <value name="圆心X值">1443</value>
+        <value name="圆心Y值">653</value>
+        <value name="半径">25</value>
+    </roi>
+    <roi type="5" enable="1" rgb="4278255360" name="s3" visible="1">
+        <value name="圆心X值">1438</value>
+        <value name="圆心Y值">741</value>
+        <value name="半径">25</value>
+    </roi>
+    <roi type="5" enable="1" rgb="4278255360" name="s4" visible="1">
+        <value name="圆心X值">1441</value>
+        <value name="圆心Y值">829</value>
+        <value name="半径">25</value>
+    </roi>
+    <roi type="5" enable="1" rgb="4278255360" name="s5" visible="1">
+        <value name="圆心X值">1349</value>
+        <value name="圆心Y值">633</value>
+        <value name="半径">25</value>
+    </roi>
+    <roi type="5" enable="1" rgb="4278255360" name="s6" visible="1">
+        <value name="圆心X值">1354</value>
+        <value name="圆心Y值">743</value>
+        <value name="半径">25</value>
+    </roi>
+    <roi type="5" enable="1" rgb="4278255360" name="s7" visible="1">
+        <value name="圆心X值">1356</value>
+        <value name="圆心Y值">846</value>
+        <value name="半径">25</value>
+    </roi>
+    <roi type="5" enable="1" rgb="4278255360" name="s8" visible="1">
+        <value name="圆心X值">1266</value>
+        <value name="圆心Y值">613</value>
+        <value name="半径">25</value>
+    </roi>
+    <roi type="5" enable="1" rgb="4278255360" name="s9" visible="1">
+        <value name="圆心X值">1275</value>
+        <value name="圆心Y值">703</value>
+        <value name="半径">25</value>
+    </roi>
+    <roi type="5" enable="1" rgb="4278255360" name="s10" visible="1">
+        <value name="圆心X值">1278</value>
+        <value name="圆心Y值">787</value>
+        <value name="半径">25</value>
+    </roi>
+    <roi type="5" enable="1" rgb="4278255360" name="s11" visible="1">
+        <value name="圆心X值">1275</value>
+        <value name="圆心Y值">873</value>
+        <value name="半径">25</value>
+    </roi>
+    <roi type="5" enable="1" rgb="4278255360" name="s12" visible="1">
+        <value name="圆心X值">1183</value>
+        <value name="圆心Y值">614</value>
+        <value name="半径">25</value>
+    </roi>
+    <roi type="5" enable="1" rgb="4278255360" name="s13" visible="1">
+        <value name="圆心X值">1182</value>
+        <value name="圆心Y值">703</value>
+        <value name="半径">25</value>
+    </roi>
+    <roi type="5" enable="1" rgb="4278255360" name="s14" visible="1">
+        <value name="圆心X值">1184</value>
+        <value name="圆心Y值">791</value>
+        <value name="半径">25</value>
+    </roi>
+    <roi type="5" enable="1" rgb="4278255360" name="s15" visible="1">
+        <value name="圆心X值">1185</value>
+        <value name="圆心Y值">879</value>
+        <value name="半径">25</value>
+    </roi>
+    <roi type="5" enable="1" rgb="4278255360" name="s16" visible="1">
+        <value name="圆心X值">1092</value>
+        <value name="圆心Y值">612</value>
+        <value name="半径">25</value>
+    </roi>
+    <roi type="5" enable="1" rgb="4278255360" name="s17" visible="1">
+        <value name="圆心X值">1091</value>
+        <value name="圆心Y值">700</value>
+        <value name="半径">25</value>
+    </roi>
+    <roi type="5" enable="1" rgb="4278255360" name="s18" visible="1">
+        <value name="圆心X值">1095</value>
+        <value name="圆心Y值">789</value>
+        <value name="半径">25</value>
+    </roi>
+    <roi type="5" enable="1" rgb="4278255360" name="s19" visible="1">
+        <value name="圆心X值">1095</value>
+        <value name="圆心Y值">885</value>
+        <value name="半径">25</value>
+    </roi>
+    <roi type="5" enable="1" rgb="4278255360" name="s20" visible="1">
+        <value name="圆心X值">998</value>
+        <value name="圆心Y值">617</value>
+        <value name="半径">25</value>
+    </roi>
+    <roi type="5" enable="1" rgb="4278255360" name="s21" visible="1">
+        <value name="圆心X值">912</value>
+        <value name="圆心Y值">617</value>
+        <value name="半径">25</value>
+    </roi>
+    <roi type="5" enable="1" rgb="4278255360" name="s22" visible="1">
+        <value name="圆心X值">999</value>
+        <value name="圆心Y值">701</value>
+        <value name="半径">25</value>
+    </roi>
+    <roi type="5" enable="1" rgb="4278255360" name="s23" visible="1">
+        <value name="圆心X值">1004</value>
+        <value name="圆心Y值">878</value>
+        <value name="半径">25</value>
+    </roi>
+    <roi type="5" enable="1" rgb="4278255360" name="s24" visible="1">
+        <value name="圆心X值">910</value>
+        <value name="圆心Y值">702</value>
+        <value name="半径">25</value>
+    </roi>
+    <roi type="5" enable="1" rgb="4278255360" name="s25" visible="1">
+        <value name="圆心X值">908</value>
+        <value name="圆心Y值">792</value>
+        <value name="半径">25</value>
+    </roi>
+    <roi type="5" enable="1" rgb="4278255360" name="s26" visible="1">
+        <value name="圆心X值">900</value>
+        <value name="圆心Y值">875</value>
+        <value name="半径">25</value>
+    </roi>
+    <roi type="5" enable="1" rgb="4278255360" name="s27" visible="1">
+        <value name="圆心X值">1003</value>
+        <value name="圆心Y值">790</value>
+        <value name="半径">25</value>
+    </roi>
+    <roi type="5" enable="1" rgb="4278255360" name="s28" visible="1">
+        <value name="圆心X值">814</value>
+        <value name="圆心Y值">628</value>
+        <value name="半径">25</value>
+    </roi>
+    <roi type="5" enable="1" rgb="4278255360" name="s29" visible="1">
+        <value name="圆心X值">821</value>
+        <value name="圆心Y值">706</value>
+        <value name="半径">25</value>
+    </roi>
+    <roi type="5" enable="1" rgb="4278255360" name="s30" visible="1">
+        <value name="圆心X值">816</value>
+        <value name="圆心Y值">791</value>
+        <value name="半径">25</value>
+    </roi>
+    <roi type="5" enable="1" rgb="4278255360" name="s31" visible="1">
+        <value name="圆心X值">815</value>
+        <value name="圆心Y值">872</value>
+        <value name="半径">25</value>
+    </roi>
+    <roi type="5" enable="1" rgb="4278255360" name="s32" visible="1">
+        <value name="圆心X值">728</value>
+        <value name="圆心Y值">654</value>
+        <value name="半径">25</value>
+    </roi>
+    <roi type="5" enable="1" rgb="4278255360" name="s33" visible="1">
+        <value name="圆心X值">727</value>
+        <value name="圆心Y值">748</value>
+        <value name="半径">25</value>
+    </roi>
+    <roi type="5" enable="1" rgb="4278255360" name="s34" visible="1">
+        <value name="圆心X值">657</value>
+        <value name="圆心Y值">804</value>
+        <value name="半径">25</value>
+    </roi>
+    <roi type="5" enable="1" rgb="4278255360" name="s35" visible="1">
+        <value name="圆心X值">737</value>
+        <value name="圆心Y值">843</value>
+        <value name="半径">25</value>
+    </roi>
+    <roi type="5" enable="1" rgb="4278255360" name="s36" visible="1">
+        <value name="圆心X值">647</value>
+        <value name="圆心Y值">700</value>
+        <value name="半径">25</value>
+    </roi>
+</root>

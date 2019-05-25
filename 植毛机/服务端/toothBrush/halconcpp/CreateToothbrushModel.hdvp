@@ -1,0 +1,180 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<hdevelop file_version="1.0" halcon_version="10.0" cs="1042724448">
+<procedure name="CreateToothbrushModel">
+<interface>
+<io>
+<par name="ImageRectangleROI"/>
+<par name="RectangleROI_2"/>
+</io>
+<oo>
+<par name="ImageModelROI"/>
+<par name="CheckSide1_ROI"/>
+<par name="HoleCircle"/>
+</oo>
+<ic>
+<par name="CheckSide"/>
+<par name="ToothBrushColor"/>
+<par name="AngleStart"/>
+<par name="AngleEnd"/>
+<par name="ScaleMin"/>
+<par name="ScaleMax"/>
+<par name="RowColumnPath"/>
+</ic>
+<oc>
+<par name="RowOrigin"/>
+<par name="ColumnOrigin"/>
+<par name="ModelID"/>
+</oc>
+</interface>
+<body>
+<l>get_domain(ImageRectangleROI, RectangleROI)</l>
+<l>* write_image(ImageRectangleROI, 'jpeg', 0, 'C:/image.jpg')</l>
+<l>area_center(RectangleROI, ROIArea, RowOrigin, ColumnOrigin)</l>
+<c></c>
+<l>gray_closing_rect (ImageRectangleROI, ImageModelROI, 21, 21)</l>
+<l>gray_opening_shape (ImageModelROI, ImageModelROI, 21, 21, 'octagon')</l>
+<c></c>
+<l>gen_empty_region(HoleCircle)</l>
+<c>** 绘制检测区域 1     刷柄（改为创建轮廓前，自动提取）</c>
+<l>if(CheckSide=0)</l>
+<l>    if(ToothBrushColor=1)</l>
+<c>        *黑色刷头</c>
+<l>        reduce_domain (ImageRectangleROI, RectangleROI, ImageReduced1)</l>
+<l>        emphasize (ImageReduced1, ImageEmphasize1, 15, 15, 15)</l>
+<l>        gray_closing_shape (ImageEmphasize1, ImageClosing1, 11, 11, 'octagon')</l>
+<l>        gray_opening_shape (ImageClosing1, ImageModelROI, 8, 8, 'octagon')</l>
+<c>        </c>
+<l>        threshold (ImageRectangleROI, Regions, 0, 120)</l>
+<l>        closing_circle (Regions, RegionClosing, 35)</l>
+<l>        fill_up (RegionClosing, RegionFillUp)</l>
+<l>        connection (RegionFillUp, ConnectedRegions)</l>
+<l>        select_shape_std (ConnectedRegions, CheckSideROI, 'max_area', 170)</l>
+<l>        closing_rectangle1(CheckSideROI, CheckSideROI, 70, 1)</l>
+<l>        dilation_circle(CheckSideROI, CheckSide1_ROI, 20)</l>
+<l>        reduce_domain (ImageModelROI, CheckSide1_ROI, ImageModelROI)</l>
+<l>        area_center (CheckSide1_ROI, Area1, RowOrigin, ColumnOrigin) </l>
+<c>        </c>
+<c>        </c>
+<l>        erosion_circle(CheckSideROI, CheckSideROIErosion, 5)</l>
+<l>        intersection(CheckSideROIErosion, RectangleROI_2, RegionIntersection)</l>
+<l>        reduce_domain(ImageModelROI, RegionIntersection, ImageReduce)</l>
+<l>        hysteresis_threshold (ImageReduce, ImageOpening1Region, 50, 255, 5)</l>
+<l>        erosion_circle (ImageOpening1Region, RegionErosion,1)</l>
+<c>        *生成对位圆孔</c>
+<l>        connection (RegionErosion, ConnectedRegions)</l>
+<c>        **动态分割</c>
+<l>        partition_rectangle (ConnectedRegions, Partitioned, 90, 70)</l>
+<l>        select_shape (Partitioned, SelectedRegions, ['area','anisometry'], 'and', [900,0], [5000,5])</l>
+<c>        </c>
+<l>        inner_circle (SelectedRegions, Rowcircle, Columncircle, Radiuscircle)</l>
+<l>        tuple_max (Radiuscircle, MaxRadius)</l>
+<l>        tuple_gen_const (|Radiuscircle|, MaxRadius+5, MaxRadiustuple)</l>
+<l>        area_center (SelectedRegions, ConnectedRegionsArea, ConnectedRegionsRow, ConnectedRegionsColumn)</l>
+<l>        gen_circle (HoleCircle, ConnectedRegionsRow, ConnectedRegionsColumn, MaxRadiustuple)</l>
+<c>        </c>
+<c>        </c>
+<l>    else</l>
+<c>        *白色刷头</c>
+<l>        hysteresis_threshold(ImageModelROI, Regions, 150, 200, 100)</l>
+<l>        erosion_circle(Regions, RegionErosion, 5)</l>
+<l>        opening_circle(RegionErosion, CheckSide1_ROI, 3.5)</l>
+<l>    endif</l>
+<l>else   </l>
+<c>    *牙刷侧面</c>
+<l>    intensity (RectangleROI, ImageRectangleROI, Mean1, Deviation1)</l>
+<l>    threshold (ImageRectangleROI, Regions, Mean1, 255)</l>
+<l>    erosion_circle(Regions, RegionErosion, 5)</l>
+<c>    </c>
+<l>    opening_circle(RegionErosion, RegionOpening, 3.5)</l>
+<l>    erosion_rectangle1(RegionOpening, CheckSide1_ROI, 5, 20)</l>
+<c>    </c>
+<l>endif</l>
+<c></c>
+<l>get_domain(ImageModelROI, Domain)</l>
+<l>erosion_circle(Domain, RegionErosion1, 3)</l>
+<l>reduce_domain(ImageModelROI, RegionErosion1, ImageModelROI)</l>
+<l>write_tuple ([RowOrigin,ColumnOrigin],RowColumnPath)</l>
+<l>* determine_shape_model_params(ImageModelROI, 'auto', AngleStart, AngleEnd, ScaleMin, ScaleMax, 'auto', 'ignore_color_polarity', 'auto', 'auto', 'all', ParameterName, ParameterValue)</l>
+<l>if(ToothBrushColor = 0)</l>
+<l>*     contrast_low := 8</l>
+<l>*     contrast_high := 20</l>
+<l>*     min_size := 20</l>
+<l>*     min_contrast := 10</l>
+<l>    rgb1_to_gray(ImageModelROI, ImageModelROI)</l>
+<l>    create_ncc_model (ImageModelROI, 'auto', AngleStart, AngleEnd, 'auto', 'use_polarity', ModelID)</l>
+<l>*     create_aniso_shape_model (ImageModelROI, 'auto', AngleStart, AngleEnd, 'auto', ScaleMin, ScaleMax, 'auto', ScaleMin, ScaleMax, 'auto', 'none', 'ignore_color_polarity', [contrast_low,contrast_high,min_size], min_contrast, ModelID)</l>
+<l>*     get_shape_model_contours(ModelContours, ModelID, 1)</l>
+<l>*     vector_angle_to_rigid(0, 0, 0, RowOrigin, ColumnOrigin, 0, ModelHomMat2D)</l>
+<l>*     affine_trans_contour_xld(ModelContours, ContoursAffinTrans, ModelHomMat2D)</l>
+<l>*     dev_display(ContoursAffinTrans)</l>
+<c>    </c>
+<l>else</l>
+<l>    rgb1_to_gray(ImageModelROI, ImageModelROI)</l>
+<l>    create_ncc_model (ImageModelROI, 'auto', AngleStart, AngleEnd,'auto', 'use_polarity', ModelID)</l>
+<l>    area_center (ImageModelROI, Area, Row, Column)</l>
+<l>endif</l>
+<c></c>
+<c></c>
+<l>return ()</l>
+</body>
+<docu id="CreateToothbrushModel">
+<parameters>
+<parameter id="AngleEnd"/>
+<parameter id="AngleStart"/>
+<parameter id="CheckSide">
+<default_type>integer</default_type>
+<multivalue>false</multivalue>
+<sem_type>integer</sem_type>
+<type_list>
+<item>integer</item>
+</type_list>
+</parameter>
+<parameter id="CheckSide1_ROI">
+<multivalue>optional</multivalue>
+<sem_type>region</sem_type>
+</parameter>
+<parameter id="ColumnOrigin"/>
+<parameter id="HoleCircle">
+<multivalue>optional</multivalue>
+<sem_type>region</sem_type>
+</parameter>
+<parameter id="ImageModelROI">
+<sem_type>image</sem_type>
+<type_list>
+<item>byte</item>
+<item>int1</item>
+<item>int2</item>
+<item>int4</item>
+<item>real</item>
+</type_list>
+</parameter>
+<parameter id="ImageRectangleROI">
+<sem_type>image</sem_type>
+<type_list>
+<item>byte</item>
+<item>int1</item>
+<item>int2</item>
+</type_list>
+</parameter>
+<parameter id="ModelID"/>
+<parameter id="RectangleROI_2">
+<multivalue>optional</multivalue>
+<sem_type>region</sem_type>
+</parameter>
+<parameter id="RowColumnPath"/>
+<parameter id="RowOrigin"/>
+<parameter id="ScaleMax"/>
+<parameter id="ScaleMin"/>
+<parameter id="ToothBrushColor">
+<default_type>integer</default_type>
+<mixed_type>false</mixed_type>
+<multivalue>false</multivalue>
+<sem_type>integer</sem_type>
+<type_list>
+<item>integer</item>
+</type_list>
+</parameter>
+</parameters>
+</docu>
+</procedure>
+</hdevelop>

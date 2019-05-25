@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf_8"?>
+<root>
+    <arithmetic>
+        <BrushHairCrushMin>10</BrushHairCrushMin>
+        <BrushHairCrushAngleMin>7</BrushHairCrushAngleMin>
+        <BrushHairCrushAngleMax>70</BrushHairCrushAngleMax>
+    </arithmetic>
+</root>

@@ -1,0 +1,8 @@
+package com.sansan.toothbrush.machine.service;
+
+import org.springframework.stereotype.Service;
+
+@Service
+public class PackProductionDataService {
+	
+}

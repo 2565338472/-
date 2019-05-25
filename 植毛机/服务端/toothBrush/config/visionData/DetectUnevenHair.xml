@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf_8"?>
+<root>
+    <arithmetic>
+        <LongShortHairArea_Min_In>27</LongShortHairArea_Min_In>
+        <LongShortHair_Min>5</LongShortHair_Min>
+        <LongShortHairThreshold_Min>45</LongShortHairThreshold_Min>
+        <ToothBrushColor>0</ToothBrushColor>
+    </arithmetic>
+</root>

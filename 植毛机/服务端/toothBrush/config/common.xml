@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Common>
+    <CameraCommon>
+        <camera1>GW0180060432</camera1>
+        <camera2>GW0180080556</camera2>
+        <camera3>GW0180060430</camera3>
+        <saveAllImage>1</saveAllImage>
+        <saveErrImage>0</saveErrImage>
+        <passWord>e10adc3949ba59abbe56e057f20f883e</passWord>
+        <continuousNG>30</continuousNG>
+        <cameraDir>./camera</cameraDir>
+        <cameraDll>daheng.dll</cameraDll>
+        <imageBayer>BGR</imageBayer>
+    </CameraCommon>
+</Common>

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf_8"?>
+<root>
+    <arithmetic>
+        <HoleThreshold_min>120</HoleThreshold_min>
+        <Hole_Circularity>0.5</Hole_Circularity>
+        <Hole_Radius>5</Hole_Radius>
+        <MovedNum>0</MovedNum>
+        <ToothBrushColor>0</ToothBrushColor>
+        <HoleArea_Min>1200</HoleArea_Min>
+    </arithmetic>
+</root>

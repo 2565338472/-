@@ -1,0 +1,249 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<hdevelop file_version="1.0" halcon_version="10.0" cs="-236389533">
+<procedure name="Toothbrush_LongshortHair">
+<interface>
+<io>
+<par name="ImageROITrans"/>
+<par name="ToothBrushRegion"/>
+<par name="Rectangle_2"/>
+</io>
+<oo>
+<par name="ToothbrushLongShortHairRegion"/>
+</oo>
+<ic>
+<par name="LongShortHairThreshold_Min"/>
+<par name="RegionMinRow"/>
+<par name="RegionMaxRow"/>
+<par name="LongShortHair_Min"/>
+<par name="ToothBrushColor"/>
+</ic>
+</interface>
+<body>
+<l>if (ToothBrushColor=0)</l>
+<l>    gen_empty_obj (ToothbrushLongShortHairRegion)</l>
+<l>    LongShortHairThreshold_MinOut := LongShortHairThreshold_Min</l>
+<l>    gen_empty_obj (ObjectsConcat)</l>
+<l>    gen_empty_obj (ObjectsConcat1)</l>
+<l>    gen_empty_obj (ObjectsConcat2)</l>
+<l>    gen_empty_obj (RegionUnion)</l>
+<l>    decompose3(ImageROITrans, R, G, B)</l>
+<l>    trans_from_rgb(R, G, B, H, S, V, 'hsv')</l>
+<l>    reduce_domain(V, ToothBrushRegion, ImageROI)</l>
+<l>    sobel_amp(ImageROI, ImaAmp, 'y_binomial', 3)</l>
+<l>*     abs_image (ImaAmp, ImageAbs)</l>
+<l>*     mean_image (ImageAbs, ImageMean, 3, 3)</l>
+<l>*     hysteresis_threshold(ImageMean, Region, 30, 70, 10)</l>
+<l>    LongShortHairThreshold_MinOut := -LongShortHairThreshold_MinOut</l>
+<l>    threshold (ImaAmp, Region, -128, LongShortHairThreshold_MinOut)</l>
+<c>    *********************纵向坐标最小值+20，未超过这条线的剔除(上侧面)，纵向坐标最大值-20，未超过这条线的剔除(下侧面)</c>
+<l>    connection (Region, ConnectedRegions)</l>
+<l>    sort_region (ConnectedRegions, SortedRegions, 'upper_left', 'true', 'column')</l>
+<l>    area_center (SortedRegions, Area, Row, Column)</l>
+<l>    try</l>
+<l>        if (RegionMinRow&gt;RegionMaxRow)</l>
+<c>            *上侧面</c>
+<l>            if (Area&gt;0)</l>
+<l>                tuple_min (Row, RowMax)</l>
+<l>            endif</l>
+<l>        else </l>
+<c>            *下侧面</c>
+<l>            if (Area&gt;0)</l>
+<l>                tuple_max (Row, RowMax)</l>
+<l>            endif</l>
+<l>        endif    </l>
+<l>    count_obj (SortedRegions, Number)</l>
+<l>    for I := 1 to Number by 1</l>
+<l>        select_obj (SortedRegions, ObjectSelected, I)</l>
+<l>        area_center (ObjectSelected, Area1, RowSelected, ColumnSelected)</l>
+<l>        if (RowSelected=RowMax)</l>
+<l>            concat_obj (ObjectSelected, ObjectsConcat, ObjectsConcat)</l>
+<l>            get_region_points (ObjectSelected, Rows, Columns)</l>
+<l>            if (RegionMinRow&gt;RegionMaxRow)</l>
+<c>                *上侧面</c>
+<l>                tuple_min (Rows, Min)</l>
+<l>                clips:= Min+20</l>
+<l>                break</l>
+<l>            else </l>
+<c>                *下侧面</c>
+<l>                tuple_max (Rows, Max)</l>
+<l>                clips:= Max-20</l>
+<l>                break</l>
+<l>            endif </l>
+<l>        endif</l>
+<l>    endfor</l>
+<l>    for J := 1 to Number by 1</l>
+<l>        select_obj (SortedRegions, ObjectSelected2, J)</l>
+<l>        area_center (ObjectSelected2, Area2, Row1, Column1)</l>
+<l>        if (RegionMinRow&gt;RegionMaxRow)</l>
+<c>            *上侧面</c>
+<l>            if (Row1&lt;clips)</l>
+<l>                concat_obj (ObjectSelected2, ObjectsConcat1, ObjectsConcat1)</l>
+<l>            else</l>
+<l>            endif</l>
+<l>        else </l>
+<c>            *下侧面</c>
+<l>            if (Row1&lt;clips)</l>
+<l>            else</l>
+<l>                concat_obj (ObjectSelected2, ObjectsConcat1, ObjectsConcat1)</l>
+<l>            endif</l>
+<l>        endif</l>
+<l>    endfor</l>
+<c>    **********************集合排序</c>
+<l>    FLY:=0</l>
+<l>    sort_region (ObjectsConcat1, SortedRegionsAfter, 'upper_left', 'true', 'column')</l>
+<l>    count_obj (SortedRegionsAfter, NumberAfter)</l>
+<l>    for Index1 := 1 to NumberAfter by 1</l>
+<l>        area_center (RegionUnion, Area3, Row3, Column3)</l>
+<l>        if (Area3&gt;0 and FLY=1)</l>
+<l>            copy_obj (RegionUnion, ObjectSelected1, 1, 1)</l>
+<l>        else</l>
+<l>           select_obj (SortedRegionsAfter, ObjectSelected1, Index1) </l>
+<l>        endif</l>
+<c>        </c>
+<l>        if (Index1=NumberAfter)</l>
+<l>            concat_obj (ObjectSelected1, ObjectsConcat2, ObjectsConcat2)</l>
+<l>            continue</l>
+<l>        endif</l>
+<l>        select_obj (SortedRegionsAfter, ObjectSelected2, Index1+1)</l>
+<l>        get_region_points (ObjectSelected1, Rows1, Columns1)</l>
+<l>        get_region_points (ObjectSelected2, Rows2, Columns2)</l>
+<l>        tuple_max (Columns1, Max1)</l>
+<l>        tuple_min (Columns2, Min1)</l>
+<l>        Distance:=Min1-Max1</l>
+<c>        *Distance为一个集合距离</c>
+<l>        if (Distance&lt;25)</l>
+<c>            *两个obj距离&lt;25为一个集合</c>
+<l>            union2 (ObjectSelected1, ObjectSelected2, RegionUnion)</l>
+<l>            FLY:=1</l>
+<l>        else</l>
+<c>            *两个obj不为一个集合</c>
+<l>            concat_obj (ObjectSelected1, ObjectsConcat2, ObjectsConcat2)</l>
+<l>            FLY:=0</l>
+<l>        endif</l>
+<l>    endfor</l>
+<l>    select_shape (ObjectsConcat2, SelectedRegions, ['rect2_len1','area'], 'and', [LongShortHair_Min,20],  [LongShortHair_Min*100,10000])</l>
+<c></c>
+<c>    ******************************************************************</c>
+<l>    dilation_circle (SelectedRegions, ToothbrushLongShortHairRegion, 25)</l>
+<l>    catch (Exception)</l>
+<l>*         dev_display (Image)</l>
+<l>    endtry</l>
+<l>else</l>
+<c>    * 生成长短毛检测区域</c>
+<l>    smallest_rectangle2 (Rectangle_2, Row3, Column3, Radian, Row4, Column4)</l>
+<l>    if (RegionMinRow&gt;RegionMaxRow)</l>
+<c>    *上侧面</c>
+<l>        gen_rectangle2(LongShortRectangle, Row3-Column4/3*2, Column3, Radian, Row4, Column4/3)</l>
+<l>    else</l>
+<c>    *下侧面</c>
+<l>        gen_rectangle2(LongShortRectangle, Row3+Column4/3*2, Column3, Radian, Row4, Column4/3)</l>
+<l>    endif</l>
+<l>    rgb1_to_gray (ImageROITrans, GrayImage)</l>
+<c>    *闭运算后有长短毛的地方的缝隙不会明显</c>
+<l>    gray_closing_rect (GrayImage, ImageClosing1, 11, 11)</l>
+<c>    *得出长短毛检测区域</c>
+<l>    reduce_domain (ImageClosing1, LongShortRectangle, ImageReduced)</l>
+<c>    *得出轮廓</c>
+<l>    scale_image (ImageReduced, ImageScaled1, 6.07143, -170)</l>
+<l>    invert_image (ImageScaled1, ImageInvert)</l>
+<l>    bin_threshold (ImageInvert, Region1)</l>
+<l>    boundary (Region1, RegionBorder, 'outer')</l>
+<l>    gen_contour_region_xld (RegionBorder, Contours1, 'border')</l>
+<c>    *打散轮廓</c>
+<l>    segment_contours_xld (Contours1, ContoursSplit, 'lines_circles', 5, 4, 2)</l>
+<c>    *筛选轮廓，先放宽长度要求   </c>
+<l>    select_shape_xld (ContoursSplit, SelectedXLD1, 'height', 'and', 0, 5)</l>
+<l>    select_shape_xld (SelectedXLD1, SelectedXLD, 'width', 'and', 15, 80)</l>
+<l>    count_obj (SelectedXLD, Number)</l>
+<c>    *轮廓转区域，不然直线轮廓求出来中心坐标是（0，0）</c>
+<l>    gen_region_contour_xld (SelectedXLD, Region2, 'filled')</l>
+<l>    area_center (Region2, Area5, Row5, Column5)</l>
+<c>    *筛选满足条件的所有区域</c>
+<l>    if (Number&gt;0)</l>
+<l>        tuple_sum (Row5, SUMROW)</l>
+<l>        if (RegionMinRow&gt;RegionMaxRow)</l>
+<c>        *上侧面</c>
+<l>            tuple_max (Row5, ROWLOW)</l>
+<l>            tuple_min (Row5, ROWHIGH)</l>
+<l>        else</l>
+<c>        *下侧面</c>
+<l>            tuple_max (Row5, ROWHIGH)</l>
+<l>            tuple_min (Row5, ROWLOW)</l>
+<l>        endif</l>
+<l>    else</l>
+<l>        SUMROW:=0</l>
+<l>        ROWLOW:=0</l>
+<l>        ROWHIGH:=0</l>
+<l>    endif</l>
+<c>    *可能出现筛选出的区域一个都没有，导致Number=0</c>
+<l>    ROW:=0</l>
+<l>    if (Number&gt;1)</l>
+<l>        ROW:=(SUMROW-ROWHIGH)/(Number-1)</l>
+<l>    endif  </l>
+<c>    *如果最低减平均&gt;最高减平均，说明有凹的地方干扰,去掉</c>
+<l>    if (abs(ROWLOW-ROW)&gt;abs(ROWHIGH-ROW))</l>
+<l>        if (RegionMinRow&gt;RegionMaxRow)</l>
+<c>        *上侧面</c>
+<l>            select_shape (Region2, SelectedRegions2, 'row', 'and', 0, ROWLOW-3)</l>
+<l>        else</l>
+<c>        *下侧面</c>
+<l>            select_shape (Region2, SelectedRegions2, 'row', 'and', ROWLOW+3, ROWLOW+1000)</l>
+<l>        endif   </l>
+<l>        area_center (SelectedRegions2, Area6, Row6, Column6)</l>
+<l>        count_obj (SelectedRegions2, Number2)</l>
+<l>        if (Number2&gt;0)</l>
+<l>            tuple_sum (Row6, SUMROW)</l>
+<l>            if (RegionMinRow&gt;RegionMaxRow)</l>
+<c>            *上侧面</c>
+<l>                tuple_max (Row6, ROWLOW)</l>
+<l>                tuple_min (Row6, ROWHIGH)</l>
+<l>            else</l>
+<c>            *下侧面</c>
+<l>                tuple_max (Row6, ROWHIGH)</l>
+<l>                tuple_min (Row6, ROWLOW)</l>
+<l>            endif</l>
+<l>        else</l>
+<l>            SUMROW:=0</l>
+<l>            ROWLOW:=0</l>
+<l>            ROWHIGH:=0</l>
+<l>        endif</l>
+<l>        ROW:=0</l>
+<l>        if (Number2&gt;1)</l>
+<l>            ROW:=(SUMROW-ROWHIGH)/(Number2-1)</l>
+<l>        endif</l>
+<l>    endif</l>
+<c>    </c>
+<c>    *如果最高和平均的差距不大，说明没有未打磨的一簇毛</c>
+<l>    if (abs(ROWHIGH-ROW)&lt;12.5)</l>
+<l>        gen_empty_obj (SelectedRegions1)</l>
+<l>    else</l>
+<l>        select_shape_xld (SelectedXLD1, SelectedXLD, 'width', 'and', 28, 80)</l>
+<l>        gen_region_contour_xld (SelectedXLD, Region3, 'filled')</l>
+<l>        if (RegionMinRow&gt;RegionMaxRow)</l>
+<c>            *上侧面</c>
+<l>                select_shape (Region3, SelectedRegions1, 'row', 'and', 0, ROWHIGH+3)</l>
+<l>            else</l>
+<c>            *下侧面</c>
+<l>                select_shape (Region3, SelectedRegions1, 'row', 'and', ROWHIGH-3, ROWHIGH+1000)</l>
+<l>            endif</l>
+<l>    endif</l>
+<c>    </c>
+<l>    dilation_circle (SelectedRegions1, ToothbrushLongShortHairRegion, 25)</l>
+<l>endif</l>
+<l>return ()</l>
+</body>
+<docu id="Toothbrush_LongshortHair">
+<parameters>
+<parameter id="ImageROITrans"/>
+<parameter id="LongShortHairThreshold_Min"/>
+<parameter id="LongShortHair_Min"/>
+<parameter id="Rectangle_2"/>
+<parameter id="RegionMaxRow"/>
+<parameter id="RegionMinRow"/>
+<parameter id="ToothBrushColor"/>
+<parameter id="ToothBrushRegion"/>
+<parameter id="ToothbrushLongShortHairRegion"/>
+</parameters>
+</docu>
+</procedure>
+</hdevelop>

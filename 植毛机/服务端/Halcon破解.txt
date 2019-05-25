@@ -1,0 +1,19 @@
+
+文件包括：
+1. halcon-10.0.0-windows.exe （Halcon主程序安装文件）
+2. halcon-10.0.1-images-windows.exe （Halcon图片安装文件）
+3. 10.0.0 patch （破解程序文件夹）
+4. Halcon破解.txt （破解说明）
+5. 附赠 Halcon 和VC配置.doc
+6. 附赠 Halcon中文简体手册.pdf
+
+破解步骤：
+注意，安装程序不要放到中文目录下，也不要把软件安装到中文目录下
+1.先装halcon-10.0.0-windows.exe，
+2.再装halcon-10.0.0-images-windows.exe，
+3.把patch文件夹下license文件夹放到halcon根目录下，
+4.patch放到bin\x86sse2-win64下，
+5.运行patch，完全破解版破解完成。
+
+
+

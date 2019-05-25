@@ -1,0 +1,433 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<hdevelop file_version="1.0" halcon_version="10.0" cs="979349992">
+<procedure name="main">
+<interface/>
+<body>
+<c>**********************************************</c>
+<c>**********    参数设置    *********************</c>
+<c>**********************************************</c>
+<c>*创建模板参数</c>
+<l>AngleStart := rad(-20)</l>
+<l>AngleEnd := rad(20)</l>
+<l>ScaleMin := 0.9</l>
+<l>ScaleMax := 1.1</l>
+<c>**********************************************</c>
+<c>************** 欠孔 参数 **********************</c>
+<c>*牙刷欠孔检测阈值</c>
+<l>HoleThreshold_min:=120</l>
+<c>*欠孔面积范围（70,1000）</c>
+<l>HoleArea_Min := 1000</l>
+<c>*欠孔半径</c>
+<l>Hole_Radius := 5</l>
+<c>*欠孔圆度</c>
+<l>Hole_Circularity  :=  0.5</l>
+<c>**********************************************</c>
+<c>************** 脏污 参数 *********************</c>
+<c>*脏污面积范围(100~500)</c>
+<l>DirtArea_Min := 250</l>
+<c>*脏污半径</c>
+<l>DirtAntiShake_Radius := 4</l>
+<c>*脏污宽度</c>
+<l>DirtAntiShake_Width := 1.5</l>
+<c>**********************************************</c>
+<c>************** 长毛 参数 *********************</c>
+<c>*长毛长度范围</c>
+<l>BrushHairLengthMin := 10</l>
+<l>BrushHairLengthMax := 2000</l>
+<c>*长毛检测阈值范围（line_gauss）</c>
+<l>BrushHair_measure_Low :=0.289088</l>
+<l>BrushHair_measure_High :=1.73453</l>
+<c>*长毛检测灵敏度</c>
+<l>Sigma := 2.3</l>
+<c>**********************************************</c>
+<c>************** 散毛 参数 *********************</c>
+<c>*散毛长度范围</c>
+<l>BrushHeadLengthMin:=60</l>
+<l>BrushHeadLengthMax:=200</l>
+<l>BrushHeadAreaMin :=60000</l>
+<c>**********************************************</c>
+<c>************** 其他 参数 *********************</c>
+<c>*刷毛颜色：白色刷毛默认为0，黑色刷毛默认为1，白柄黑色刷毛默认为2</c>
+<l>ToothBrushColor := 1</l>
+<c>*检测牙刷正面 0   or    侧面 1</c>
+<l>CheckSide := 1</l>
+<c>*缺陷类型</c>
+<l>DefectType := []</l>
+<c>********************************************************************************************************************************</c>
+<l>FilePath := 'C:/Users/Administrator/Desktop/牙刷/图片/'</l>
+<l>ModelPath := FilePath + 'Orange/cameraFirst/'</l>
+<l>read_image(ImageModel, ModelPath + '111/1-080638')</l>
+<l>* read_image (ImageModel, 'E:/牙刷检测第二台/叉毛排序/牙刷图片已分类/绿色白色相间/正常/3-130115.jpg')</l>
+<l>get_image_size(ImageModel, Width, Height)</l>
+<l>dev_close_window()</l>
+<l>dev_open_window(0, 0, 640, 480, 'black', WindowHandle)</l>
+<l>dev_display(ImageModel)</l>
+<l>dev_set_draw('margin')</l>
+<l>dev_set_line_width(2)</l>
+<l>set_display_font(WindowHandle, 22, 'mono', 'true', 'false')</l>
+<c></c>
+<l>gen_empty_obj (Rectangle_2)</l>
+<c>* 绘制牙刷检测区域  RectangleROI</c>
+<l>disp_message(WindowHandle, '请用鼠标绘制 牙刷检测 区域', 'window', -1, -1, 'black', 'true')</l>
+<l>read_tuple(ModelPath + 'ROI.tup', ROI_Tuple)</l>
+<l>Row1 := ROI_Tuple[0]</l>
+<l>Column1 := ROI_Tuple[1]</l>
+<l>Row2 := ROI_Tuple[2]</l>
+<l>Column2 := ROI_Tuple[3]</l>
+<l>draw_rectangle1(WindowHandle, Row1, Column1, Row2, Column2)</l>
+<l>gen_rectangle1(RectangleROI, Row1, Column1, Row2, Column2)</l>
+<l>reduce_domain(ImageModel, RectangleROI, ImageRectangleROI)</l>
+<c></c>
+<c>* 绘制检测区域 2   刷毛  RectangleROI_2</c>
+<l>dev_display(ImageModel)</l>
+<c></c>
+<l>disp_message(WindowHandle, '请用鼠标绘制 刷毛 检测区域', 'window', -1, -1, 'black', 'true')</l>
+<l>if (CheckSide=1)</l>
+<l>*     Row3 := ROI_Tuple[4]</l>
+<l>*     Column3 := ROI_Tuple[5]</l>
+<l>*     Radian:=ROI_Tuple[6]</l>
+<l>*     Row4 := ROI_Tuple[7]</l>
+<l>*     Column4 := ROI_Tuple[8]</l>
+<l>    draw_rectangle2 (WindowHandle, Row3, Column3, Radian, Row4, Column4)</l>
+<l>    gen_rectangle2 (Rectangle1, Row3, Column3, Radian, Row4-160, Column4)</l>
+<l>else</l>
+<l>    Row3 := ROI_Tuple[4]</l>
+<l>    Column3 := ROI_Tuple[5]</l>
+<l>    Row4 := ROI_Tuple[6]</l>
+<l>    Column4 := ROI_Tuple[7]</l>
+<l>    draw_rectangle1 (WindowHandle, Row3, Column3, Row4, Column4)</l>
+<l>    gen_rectangle1 (Rectangle1, Row3+50, Column3+200, Row4-50,Column4-100)</l>
+<l>endif</l>
+<l>* draw_rectangle1 (WindowHandle, Row3, Column3, Row4, Column4)</l>
+<l>if(CheckSide=0)</l>
+<l>    disp_message(WindowHandle, '请用鼠标绘制 散毛 检测区域', 'window', -1, -1, 'black', 'true')</l>
+<l>    draw_rectangle1 (WindowHandle, Row5, Column5, Row6, Column6)</l>
+<l>    read_tuple(ModelPath + 'looseHairROI.tup', HairROI_Tuple)</l>
+<l>*     Row5 := HairROI_Tuple[0]</l>
+<l>*     Column5 := HairROI_Tuple[1]</l>
+<l>*     Row6 := HairROI_Tuple[2]</l>
+<l>*     Column6 := HairROI_Tuple[3]</l>
+<l>    gen_rectangle1 (RectangleROI_3, Row5, Column5, Row6, Column6)</l>
+<l>    gen_ellipse(RectangleROI_2, abs(Row4+Row3)/2,  abs(Column4+Column3)/2, 0,  abs(Column4-Column3)/2,  abs(Row4-Row3)/2)</l>
+<l>else</l>
+<c>    * 采用Row2作为底边，保证底部区域不被误检</c>
+<l>    gen_rectangle2(Rectangle_2, Row3, Column3, Radian, Row4, Column4)</l>
+<l>    difference(RectangleROI, Rectangle_2, RectangleROI_2)</l>
+<l>    gen_empty_region (RectangleROI_3)</l>
+<c>    * 绘制屏蔽金属块区域</c>
+<l>    dev_display(ImageModel)</l>
+<l>    disp_message(WindowHandle, '请用鼠标绘制 屏蔽金属块 区域', 'window', -1, -1, 'black', 'true')</l>
+<l>*     read_tuple(ModelPath + 'masking.tup', Mask_Tuple)</l>
+<l>*     RowMask1 := Mask_Tuple[0]</l>
+<l>*     ColumnMask1 := Mask_Tuple[1]</l>
+<l>*     RowMask2 := Mask_Tuple[2]</l>
+<l>*     ColumnMask2 := Mask_Tuple[3]    </l>
+<l>*     RowMask3 := Mask_Tuple[4]</l>
+<l>*     ColumnMask3 := Mask_Tuple[5]</l>
+<l>*     RowMask4 := Mask_Tuple[6]</l>
+<l>*     ColumnMask4 := Mask_Tuple[7] </l>
+<l>     draw_rectangle1 (WindowHandle, RowMask1, ColumnMask1, RowMask2, ColumnMask2)</l>
+<l>     draw_rectangle1 (WindowHandle, RowMask3, ColumnMask3, RowMask4, ColumnMask4)</l>
+<l>    gen_rectangle1(Rectangle_3,  RowMask1, ColumnMask1, RowMask2, ColumnMask2)</l>
+<l>    gen_rectangle1(Rectangle_4, RowMask3, ColumnMask3, RowMask4, ColumnMask4)</l>
+<l>    difference(RectangleROI_2, Rectangle_3, RectangleROI_2)</l>
+<l>    difference(RectangleROI_2, Rectangle_4, RectangleROI_2)</l>
+<l>    connection(RectangleROI_2, RectangleROI_2)</l>
+<l>    select_shape_std(RectangleROI_2, RectangleROI_2, 'max_area', 70) </l>
+<l>endif</l>
+<l>reduce_domain (ImageModel, RectangleROI_2, ImageRectangleROI_2)</l>
+<c></c>
+<l>PositionCorrect := 1</l>
+<c></c>
+<l>if(PositionCorrect = 1)</l>
+<c>    *************  位置校正  创建模板  ***************</c>
+<c>    *输入：</c>
+<c>    *ImageRectangleROI                          牙刷检测区域图片                </c>
+<c>    *CheckSide                                  牙刷检测正面or侧面               </c>
+<c>    *ToothBrushColor                            牙刷颜色</c>
+<c>    *AngleStart        := rad(-35)              模板角度范围（开始）</c>
+<c>    *AngleEnd          := rad(35)               模板角度范围（结束）</c>
+<c>    *ScaleMin          := 0.9                   模板缩放尺度（最小）</c>
+<c>    *ScaleMax          := 1.1                   模板缩放尺度（最大）</c>
+<c>    *输出：    </c>
+<c>    *ImageModelROI                              创建模板使用的图像     </c>
+<c>    *CheckSide1_ROI                             侧面检测区域  </c>
+<c>    *RowOrigin                                  模板中心（横坐标）</c>
+<c>    *ColumnOrigin                               模板中心（列坐标）</c>
+<c>    *ModelID                                    模板ID</c>
+<l>    RowColumnPath := './RowColumn.tup'</l>
+<l>    ModelIDPath := './shapeModel.shm'</l>
+<l>    RegionPath := './region.reg'</l>
+<l>    HolesRegionPath := './holesRegion.reg'</l>
+<l>    CreateToothbrushModel (ImageRectangleROI, RectangleROI_2, ImageModelROI, CheckSide1_ROI, HoleCircle, CheckSide, ToothBrushColor, AngleStart, AngleEnd, ScaleMin, ScaleMax, RowColumnPath, RowOrigin, ColumnOrigin, ModelID)</l>
+<l>    if(ToothBrushColor=0)</l>
+<l>        write_ncc_model(ModelID, ModelIDPath)</l>
+<l>    else</l>
+<l>        write_ncc_model(ModelID, ModelIDPath)</l>
+<l>    endif   </l>
+<l>    write_region (CheckSide1_ROI, RegionPath)</l>
+<l>    write_region (HoleCircle, HolesRegionPath)</l>
+<l>else</l>
+<l>    copy_image(ImageRectangleROI, ImageModelROI)</l>
+<l>    copy_obj(RectangleROI, CheckSide1_ROI, 1, -1)</l>
+<l>endif</l>
+<l>stop()</l>
+<c></c>
+<c>*************************************************************************************************************</c>
+<l>count_seconds (Seconds)</l>
+<c>*读取创建模板文件</c>
+<l>if(PositionCorrect = 1)</l>
+<l>    if(ToothBrushColor=0)</l>
+<l>        read_ncc_model(ModelIDPath, ModelID)</l>
+<l>*         read_ncc_model(ModelPath+'/modelShape.shm', ModelID)</l>
+<l>    else</l>
+<l>        read_ncc_model(ModelIDPath, ModelID)</l>
+<l>    endif   </l>
+<l>*     read_tuple (ModelPath+'/rowColumn.tup', Tuple1)</l>
+<l>    read_tuple (RowColumnPath, Tuple1)</l>
+<l>    read_region (CheckSide1_ROI, RegionPath)</l>
+<l>    RowOrigin:=Tuple1[0]</l>
+<l>    ColumnOrigin:= Tuple1[1]</l>
+<l>endif    </l>
+<c>*读取图片</c>
+<l>list_files ('C:/Users/Administrator/Desktop/牙刷图片已分类/黑色/正常', ['files','follow_links'], ImageFiles)</l>
+<l as_id="image_acquisition" as_name="Image Acquisition 01" as_grp="[1,3]" as_ord="1">tuple_regexp_select (ImageFiles, ['\\.(tif|tiff|gif|bmp|jpg|jpeg|jp2|png|pcx|pgm|ppm|pbm|xwd|ima|hobj)$','ignore_case'], ImageFiles)</l>
+<l>for Index := 0 to |ImageFiles| by 1</l>
+<l as_id="image_acquisition" as_name="Image Acquisition 01" as_grp="[2,3]" as_ord="1">    read_image (ImageNew, ImageFiles[Index])</l>
+<l>    reduce_domain(ImageNew, RectangleROI, ImageROI)</l>
+<c>    *create empty object</c>
+<l>    Area := 1</l>
+<l>    Score := 0</l>
+<l>    gen_empty_obj(DefectRegionUnion)</l>
+<l>    gen_empty_obj(ToothbrushHoleRegion)</l>
+<l>    gen_empty_obj(BlackDirtPointRegion)</l>
+<l>    gen_empty_obj(ToothbrushWrongHairRegion)</l>
+<l>    gen_empty_obj (HoleCircleDilated)</l>
+<l>    gen_empty_obj (CheckROI1)</l>
+<c>    </c>
+<c>    **长短毛 叉毛</c>
+<l>    gen_empty_obj (ToothbrushHairCrushRegion)</l>
+<l>    gen_empty_obj (ToothbrushLongShortHairRegion)    </l>
+<l>    hom_mat2d_identity(HomMat2D)</l>
+<l>    if(PositionCorrect = 1)</l>
+<c>        *************  位置校正  模板匹配  ***************</c>
+<c>        *输入：</c>
+<c>        *ImageROI                                   被检测牙刷检测区域</c>
+<c>        *ToothBrushColor                            牙刷颜色</c>
+<c>        *AngleStart        := rad(-35)              模板角度范围（开始）</c>
+<c>        *AngleEnd          := rad(35)               模板角度范围（结束）</c>
+<c>        *ScaleMin          := 0.9                   模板缩放尺度（最小）</c>
+<c>        *ScaleMax          := 1.1                   模板缩放尺度（最大）</c>
+<c>        *RowOrigin                                  模板中心（横坐标）</c>
+<c>        *ColumnOrigin                               模板中心（列坐标）</c>
+<c>        *ModelID                                    模板ID</c>
+<c>        *输出：</c>
+<c>        *ImageROITrans                              仿射变换后图片    </c>
+<c>        *HomMat2D                                   仿射变换矩阵</c>
+<c>        *Score                                      匹配度</c>
+<l>        count_seconds (Seconds2)</l>
+<l>        PlaceCorrect(ImageROI, ImageROITrans, ToothBrushColor, AngleStart, AngleEnd, ScaleMin, ScaleMax, RowOrigin, ColumnOrigin, ModelID, HomMat2D, Score)</l>
+<l>        count_seconds (Seconds3)</l>
+<l>        reduce_domain(ImageROITrans, RectangleROI, ImageROITrans)</l>
+<l>    else</l>
+<l>        copy_image(ImageROI, ImageROITrans)</l>
+<l>    endif  </l>
+<l>    ScoreInput:= Score</l>
+<l>    Toothbrush_Detection(ImageROITrans, ImageRectangleROI, CheckSide1_ROI, RectangleROI_2, Rectangle_2, RectangleROI, Rectangle1, ImageSub, DirtCheckROI, RectangleROIDiff_2, CheckROI1, RowMask1, ColumnMask1, RowMask2, ColumnMask2, RowMask3, ColumnMask3, RowMask4, ColumnMask4, Score, CheckSide, ScoreInput)</l>
+<c>    </c>
+<l>    if(|Score|&gt;0)</l>
+<l>        if(CheckSide=0)</l>
+<l>            DirtArea_Min := 999999</l>
+<l>        endif</l>
+<c>        *************  脏污检测  ***************</c>
+<c>        *输入：</c>
+<c>        *ImageSub                                    原牙刷与被测牙刷相减后模板</c>
+<c>        *DirtCheckROI                                牙刷脏污检测区域</c>
+<c>        *RectangleROI_2                              正面牙刷检测区域</c>
+<c>        *DirtArea_Min            := 100（1300）      侧面（正面）脏污缺陷面积</c>
+<c>        *DirtAntiShake_Radius    := 4                脏污半径</c>
+<c>        *DirtAntiShake_Width     := 1.5              脏污宽度</c>
+<c>        *CheckSide                                   牙刷正面or侧面</c>
+<c>        *输出：</c>
+<c>        *BlackDirtPointRegion                        脏污的区域</c>
+<l>        DirtCheck (ImageSub, DirtCheckROI, RectangleROIDiff_2, BlackDirtPointRegion, DirtArea_Min, DirtAntiShake_Radius, DirtAntiShake_Width, CheckSide)</l>
+<c>        *************  侧面长毛，正面散毛检测  ***************</c>
+<c>        *输入：</c>
+<c>        *ImageSub                                    原牙刷与被测牙刷相减后模板</c>
+<c>        *ImageModelROI                               创建模板使用的图像</c>
+<c>        *RectangleROI_2                              牙刷长毛检测区域</c>
+<c>        *RectangleROI_3                              牙刷散毛检测区域</c>
+<c>        *ImageROITrans                               被检测牙刷图经仿射变换后结果</c>
+<c>        *Sigma                   ：=2.3              长毛检测灵敏度</c>
+<c>        *BrushHairLengthMin      ：=10               牙刷长毛长度最小值</c>
+<c>        *BrushHairLengthMax      ：=2000             牙刷长毛长度最大值</c>
+<c>        *BrushHeadLengthMin      ：=60               牙刷散毛长度最小值</c>
+<c>        *BrushHeadLengthMax      ：=200              牙刷散毛长度最大值</c>
+<c>        *BrushHair_measure_Low   ：=0.289            长毛检测最小阈值</c>
+<c>        *BrushHair_measure_High  ：=1.156            长毛检测最大阈值</c>
+<c>        *BrushHeadAreaMin        : =6000             牙刷正面刷头缺陷面积</c>
+<c>        *CheckSide                                   牙刷正面or侧面</c>
+<c>        *输出：</c>
+<c>        *ToothbrushHairRegion                        牙刷长毛的区域 </c>
+<l>        LongShortHair_Min:=45</l>
+<l>        BrushHairCrushMin:=13.5</l>
+<l>        BrushHairCrushAngleMin:=7</l>
+<l>        BrushHairCrushAngleMax:=70</l>
+<l>        LongShortHairThreshold_Min:=50</l>
+<c>              </c>
+<l>        if(CheckSide=0)</l>
+<c>            ******************** 检测散毛  ************************</c>
+<c>            * ROI_1 - ROI_2 的交集区域为牙刷散毛 检测区域</c>
+<l>            Toothbrush_Sanmao (ImageSub, RectangleROIDiff_2, RectangleROI_3, ImageROITrans, ToothbrushHairRegion, BrushHeadAreaMin, Sigma, BrushHeadLengthMin, BrushHeadLengthMax)</l>
+<l>        else</l>
+<c>            ******************** 检测长毛  ************************</c>
+<c>            * ROI_2区域为牙刷长毛 检测区域 </c>
+<l>            Toothbrush_LongHair (ImageSub, RectangleROIDiff_2, ToothbrushHairRegion, ToothBrushRegion, Sigma, BrushHair_measure_Low, BrushHair_measure_High, BrushHairLengthMin, BrushHairLengthMax)</l>
+<c>            ********************************************增加叉毛检测(黑色会把上面的柄误检)*****************</c>
+<c>            *判断上侧面或下侧面&lt;/c&gt;</c>
+<l>            Toothbrush_Chamao (CheckROI1, ImageROITrans, Rectangle_2, ToothbrushHairRegion, ToothbrushHairCrushRegion, BrushHairCrushMin, BrushHairCrushAngleMin, BrushHairCrushAngleMax, RegionMaxRow, RegionMinRow)</l>
+<c>            *********************************************************************************************************  </c>
+<c>            **************************************增加长短毛检测********************************************************    </c>
+<l>            Toothbrush_LongshortHair (ImageROITrans, ToothBrushRegion, ToothbrushLongShortHairRegion, LongShortHairThreshold_Min, RegionMinRow, RegionMaxRow, LongShortHair_Min)</l>
+<c>         </c>
+<c>            *********************************************************************************************************</c>
+<l>        endif</l>
+<c>        </c>
+<c>        </c>
+<l>        if (CheckSide=1)</l>
+<c>            ****************   侧面植错毛，磨坏毛型算法 **********************</c>
+<c>            *输入</c>
+<c>            *ImageSub                                 原牙刷与被测牙刷相减后模板</c>
+<c>            *DirtCheckROI                             牙刷脏污检测区域</c>
+<c>            *WrongHairThresh_min     := 180           植错毛分割阈值</c>
+<c>            *WrongAreaMin            := 4000          植错毛最小面积</c>
+<c>            *WrongAreaMax            := 200000        植错毛最大面积</c>
+<c>            *WrongHeightMin          := 110           植错毛最小高度</c>
+<c>            *输出</c>
+<c>            *ToothbrushWrongHairRegion                植错毛区域</c>
+<l>            WrongAreaMin := 4000</l>
+<l>            WrongAreaMax := 200000</l>
+<l>            WrongHairThresh_min := 180</l>
+<l>            WrongHeightMin:=110</l>
+<l>            WrongWidthMin:=45</l>
+<l>            WrongWidthMax:=1000</l>
+<l>            ToothbrushWrongHair_Check (ImageSub, DirtCheckROI, ToothbrushWrongHairRegion, WrongHairThresh_min, WrongAreaMin, WrongAreaMax, WrongHeightMin, WrongWidthMin, WrongWidthMax)</l>
+<l>        else</l>
+<l>            if(ToothBrushColor=1)</l>
+<l>                HoleThreshold_min := 200</l>
+<l>                HoleArea_Min := 300</l>
+<l>                erosion_circle(CheckSide1_ROI, CheckSide1_ROIErosion, 16)</l>
+<l>                dilation_circle(HoleCircle, HoleCircleDilated, 7)</l>
+<l>                difference (RectangleROI_3, CheckSide1_ROIErosion, RegionDifference)</l>
+<l>                difference (HoleCircleDilated, RegionDifference, HoleCircleDilated)    </l>
+<l>            endif</l>
+<c>            *************  牙刷头（欠孔）检测  ***************</c>
+<c>            *输入： </c>
+<c>            *ImageSub                                    原牙刷与被测牙刷相减后模板      HObject</c>
+<c>            *ImageROITrans                               被检测牙刷图经仿射变换后结果</c>
+<c>            *RectangleROI_2                              牙刷头检测区域</c>
+<c>            *HoleThreshold_min      := 120               牙刷头区域检测阈值              HTuple</c>
+<c>            *HoleArea_Min           := 1000              欠孔面积范围</c>
+<c>            *Hole_Circularity       := 0.5               欠孔圆度</c>
+<c>            *Hole_Radius            := 5                 欠孔半径</c>
+<c>            *CheckSide                                   牙刷正面or侧面</c>
+<c>            *ToothBrushColor                             牙刷颜色</c>
+<c>            *输出：</c>
+<c>            *ToothbrushHoleRegion                        被选中牙刷头缺陷的区域</c>
+<c>            *MovedNum纠偏上下移动</c>
+<c>            *白柄黑毛</c>
+<c>            **HoleThreshold_min := 100</c>
+<c>            **HoleArea_Min := 200</c>
+<l>            MovedNum:=-10</l>
+<l>            ToothbrushHole_Check (ImageSub, ImageROITrans, RectangleROIDiff_2, HoleCircle, ToothbrushHoleRegion, HoleThreshold_min, HoleArea_Min, Hole_Radius, Hole_Circularity, CheckSide, ToothBrushColor, MovedNum)                        </l>
+<l>        endif</l>
+<c>        </c>
+<l>        Number0:=0</l>
+<l>        Number1:=0</l>
+<l>        Number2:=0</l>
+<l>        Number3:=0</l>
+<c>        **长短毛4 叉毛5</c>
+<l>        Number4:=0</l>
+<l>        Number5:=0</l>
+<c>        </c>
+<l>        union2(BlackDirtPointRegion, ToothbrushHoleRegion, DefectRegionUnion)</l>
+<l>        union2(DefectRegionUnion, ToothbrushWrongHairRegion, DefectRegionUnion)</l>
+<l>        union2(DefectRegionUnion, ToothbrushHairRegion, DefectRegionUnion)</l>
+<c>        **长短毛4 叉毛5</c>
+<l>        union2(DefectRegionUnion, ToothbrushHairCrushRegion, DefectRegionUnion)</l>
+<l>        union2(DefectRegionUnion, ToothbrushLongShortHairRegion, DefectRegionUnion)</l>
+<c>        </c>
+<c>        </c>
+<l>        count_obj (BlackDirtPointRegion, Number0)</l>
+<l>        count_obj (ToothbrushHairRegion, Number1)</l>
+<l>        count_obj (ToothbrushWrongHairRegion, Number2)</l>
+<l>        count_obj (ToothbrushHoleRegion, Number3)</l>
+<c>        *长短毛4 叉毛5</c>
+<l>        count_obj (ToothbrushHairCrushRegion, Number4)</l>
+<l>        count_obj (ToothbrushLongShortHairRegion, Number5)</l>
+<c>        </c>
+<l>        ErrorCode := [Number0, Number1, Number2, Number3]</l>
+<c>        </c>
+<l>        dilation_circle(DefectRegionUnion, DefectRegionUnion, 10)</l>
+<l>        union1(DefectRegionUnion, DefectRegionUnion)</l>
+<l>        area_center(DefectRegionUnion, Area, Row, Column)</l>
+<c>        </c>
+<l>        hom_mat2d_invert(HomMat2D, HomMat2DInvert)</l>
+<l>        affine_trans_region (DefectRegionUnion, DefectRegionUnion, HomMat2DInvert, 'true')</l>
+<l>    endif </l>
+<c>    *************  显示结果  ***************   </c>
+<l>    boundary(RectangleROI, RectangleROIother, 'inner')</l>
+<l>    dilation_circle(RectangleROIother, RectangleROIother, 3)</l>
+<l>    paint_region (RectangleROIother, ImageNew, ImageResult, [255,0,0], 'fill')</l>
+<l>    count_obj (DefectRegionUnion, Number)</l>
+<l>    if(Number&gt;0)</l>
+<l>        boundary(DefectRegionUnion, DefectRegionUnion, 'inner')</l>
+<l>        dilation_circle(DefectRegionUnion, DefectRegionUnion, 3)</l>
+<l>        paint_region (DefectRegionUnion, ImageResult, ImageResult, [255,0,0], 'fill')</l>
+<l>    endif</l>
+<c>    </c>
+<l>    dev_display(ImageNew)</l>
+<l>    dev_display(ImageResult)</l>
+<c>    *无料</c>
+<l>    if( |Score|=0 )</l>
+<l>        Color := 'red'</l>
+<l>        disp_message(WindowHandle, '未检测到料！', 'window', -1, -1, Color, 'true')</l>
+<l>        DetectedResult := 3</l>
+<l>        wait_seconds (0.5)</l>
+<c>        *NG</c>
+<l>    elseif( Area&gt;0 and |Score|=1 )</l>
+<l>        if(Number0&gt;0 or Number2&gt;0)</l>
+<l>            Color := 'red'</l>
+<l>            disp_message(WindowHandle, 'NG    不可修复', 'window', -1, -1, Color, 'true') </l>
+<l>            DetectedResult := 2</l>
+<l>        elseif(Number1&gt;0 or Number3&gt;0)</l>
+<l>            Color := 'red'</l>
+<l>            disp_message(WindowHandle, 'NG    可修复', 'window', -1, -1, Color, 'true') </l>
+<l>            DetectedResult := 1 </l>
+<l>        endif     </l>
+<l>        Color := 'red'</l>
+<c>        *OK</c>
+<l>    elseif( |Area|= 0 or |Score|=1 )</l>
+<l>        Color := 'green'</l>
+<l>        DetectedResult := 0       </l>
+<c>        </c>
+<l>        disp_message(WindowHandle, 'OK', 'window', -1, -1, Color, 'true')</l>
+<l>    endif</l>
+<c>    </c>
+<l>    dev_set_color(Color)</l>
+<l>    dev_set_draw('margin')</l>
+<l>    count_seconds (Seconds1)</l>
+<c>    </c>
+<l>    Time := Seconds1 - Seconds2</l>
+<l>    Message[0] := Index + ' / ' + |ImageFiles| </l>
+<l>    Message[1] := 'Time =' + Time</l>
+<l>    disp_message(WindowHandle, Message, 'window', 80, -1, Color, 'true')</l>
+<l>    dump_window (WindowHandle, 'jpeg', './Result.jpg')</l>
+<l>    stop()</l>
+<l>endfor</l>
+</body>
+<docu id="main">
+<parameters/>
+</docu>
+</procedure>
+</hdevelop>

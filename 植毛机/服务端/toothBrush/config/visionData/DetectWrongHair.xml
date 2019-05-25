@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf_8"?>
+<root>
+    <arithmetic>
+        <WrongAreaMin>4000</WrongAreaMin>
+        <WrongHairThresh_min>180</WrongHairThresh_min>
+        <WrongWidthMin>45</WrongWidthMin>
+        <WrongAreaMax>200000</WrongAreaMax>
+        <WrongWidthMax>1000</WrongWidthMax>
+        <WrongHeightMin>110</WrongHeightMin>
+    </arithmetic>
+</root>

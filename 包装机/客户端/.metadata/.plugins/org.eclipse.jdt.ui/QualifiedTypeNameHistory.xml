@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<qualifiedTypeNameHistroy>
+<fullyQualifiedTypeName name="org.springframework.data.jpa.repository.JpaRepository"/>
+<fullyQualifiedTypeName name="com.sansan.toothbrush.machine.entity.PackProductionData"/>
+<fullyQualifiedTypeName name="com.sansan.toothbrush.machine.repository.PackProductionDataRepository"/>
+<fullyQualifiedTypeName name="com.sansan.toothbrush.machine.entity.req.PackProductionDataHistoryReq"/>
+<fullyQualifiedTypeName name="java.text.SimpleDateFormat"/>
+<fullyQualifiedTypeName name="java.util.Date"/>
+<fullyQualifiedTypeName name="com.sansan.toothbrush.machine.entity.req.PackProductionDataBaseInfoReq"/>
+<fullyQualifiedTypeName name="com.sansan.toothbrush.machine.service.PackProductionDataServices"/>
+<fullyQualifiedTypeName name="org.apache.commons.lang.StringUtils"/>
+<fullyQualifiedTypeName name="com.sansan.toothbrush.machine.thread.SaveDataThread"/>
+<fullyQualifiedTypeName name="org.springframework.beans.factory.annotation.Autowired"/>
+<fullyQualifiedTypeName name="java.util.regex.Pattern"/>
+<fullyQualifiedTypeName name="ch.qos.logback.core.boolex.Matcher"/>
+<fullyQualifiedTypeName name="java.util.regex.Matcher"/>
+<fullyQualifiedTypeName name="java.lang.String"/>
+<fullyQualifiedTypeName name="javax.persistence.EntityManagerFactory"/>
+<fullyQualifiedTypeName name="java.lang.Integer"/>
+<fullyQualifiedTypeName name="org.hibernate.sql.Select"/>
+<fullyQualifiedTypeName name="javax.persistence.Entity"/>
+<fullyQualifiedTypeName name="javax.persistence.Table"/>
+<fullyQualifiedTypeName name="org.hibernate.annotations.DynamicInsert"/>
+<fullyQualifiedTypeName name="org.hibernate.annotations.DynamicUpdate"/>
+<fullyQualifiedTypeName name="org.springframework.jdbc.core.JdbcTemplate"/>
+</qualifiedTypeNameHistroy>

@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en" class="app">
+<head>
+<meta charset="UTF-8">
+<title>广东三三智能科技有限公司</title>
+<link rel="stylesheet" type="text/css" href="css/style.css">
+<link rel="stylesheet" type="text/css" href="laydate/theme/default/laydate.css">
+<script type="text/javascript" src="js/jquery-3.3.1.min.js" charset="utf-8"></script>
+<script type="text/javascript" src="js/vector.js"></script>
+</head>
+<body>
+<div class="header hide">
+	<div id="showPadIcon" class="header_zhishiban" title="指示板：鼠标双击全屏">指示板</div>
+	<div class="header_nav">
+		<div class="header_menu">
+			<button id="devlog_win" title="历史记录"><img src="image/历史记录.jpg" /></button>
+			<button id="excell" onclick="method5('realdata_table')" title="导出表格"><img src="image/导出按钮.png" style=""/></button>
+			<button id="login_win" title="登陆"><img src="image/login.png" /></button><!-- 登录 -->
+			<button id="modifyPwd_win" title="修改账号密码"><img src="image/modifyPwd.png" /></button><!-- 修改账号密码 -->
+			<button id="setting_win" title="配置"><img src="image/setting.png" /></button><!-- 设置ip地址 -->
+			<button id="exit" title="退出"><img src="image/exit.png" /></button>
+		</div>
+		<div class="header_status hide">
+			<ul>
+				<li>
+					<span class="block_blur"></span>
+					<span>所有</span>
+					<span id="allLineCount">9</span>
+				</li>
+				<li>
+					<span class="block_green"></span>
+					<span>工作</span>
+					<span id="workingCount">0</span>
+				</li>
+				<li>
+					<span class="block_orange"></span>
+					<span>空闲</span>
+					<span id="freeCount">0</span>
+				</li>
+				<li>
+					<span class="block_red"></span>
+					<span>异常</span>
+					<span id="errorCount">0</span>
+				</li>
+				<li>
+					<span class="block_gray"></span>
+					<span>掉线</span>
+					<span id="offlineCount">0</span>
+				</li>
+			</ul>
+		</div>
+	</div>
+	<div class="header_logo">
+		<div class="header_haoxinqin_logo"><img src="image/xuejie.gif" style="height: 70px; width: 70px;"/></div>
+		<div style="width:500px;float:left; text-align:center;margin-top:20px;">
+			<div class="header_title">植毛机生产监控系统</div>
+			<div class="header_contact">广东雪洁日化有限公司：http://www.sugere.com.cn/</div>
+			<div class="header_contact">广东三三智能科技有限公司：www.33tech.cn</div>
+		</div>
+		<div class="header_sansan_logo"><img src="image/logo.png" /></div>
+	</div>
+</div>
+<div class="main">
+	<table id="realdata_table"  border="0"   cellspacing="0" cellpadding="0">
+		<thead>
+			<tr>
+				<th>机器名称</th>
+				<th>合格数</th>
+				<th>欠孔</th>
+				<th>长毛</th>
+				<th>散毛</th>
+				<th>长短毛</th>
+				<th>脏毛</th>
+				<th>错误植毛</th>
+				<th>差毛</th>
+				<th>全部总数</th>
+				<th>开始时间</th>
+				<th>最后结束时间</th>
+			</tr>
+		</thead>
+		
+	</table>
+</div>
+<div class="div_shade"></div>
+<div class="devlog_window window">
+	<div class="window_title">历史记录<span class="close_window">×</span></div>
+	<div class="window_body">
+		<div style="overflow:auto;height:520px;line-height:2em;">
+			<div>
+				筛选日期:<input type="text" class="layui-input" id="time">
+				<button id="time_query">查询</button>
+			</div>
+			<br>
+			<table id="devlog_table" border="0" cellspacing="0" cellpadding="0">
+				<thead>
+					<tr>
+						<th>机器名称</th>
+						<th>状态</th>
+						<th>合格数</th>
+						<th>欠孔</th>
+						<th>长毛</th>
+						<th>散毛</th>
+						<th>长短毛</th>
+						<th>脏毛</th>
+						<th>错误植毛</th>
+						<th>差毛</th>
+						<th>全部总数</th>
+						<th>开始时间</th>
+						<th>最后结束时间</th>
+					</tr>
+				</thead>
+				<tbody>
+				</tbody>
+			</table>
+		</div>
+	</div>
+	<div class="window_footer">
+		<button  onclick="method5('devlog_table')" title="导出表格">导出表格</button>
+	</div>
+</div>
+<div class="login_window window">
+	<div class="window_title">用户登录<span class="close_window">×</span></div>
+	<div class="window_body">
+		<div>
+			<label>账户:</label>
+			<input id="userName" type="text" />
+		</div>
+		<div>
+			<label>密码:</label>
+			<input id="password" type="password" />
+		</div>
+	</div>
+	<div class="window_footer">
+		<button id="login"> 登 录 </button>
+		<button id="logout" disabled=true> 注 销 </button>
+	</div>
+</div>
+<div class="modifyPwd_window window">
+	<div class="window_title">修改密码<span class="close_window">×</span></div>
+	<div class="window_body">
+		<div>
+			<label>当前密码:</label>
+			<input id="current_PSW" type="password" />
+		</div>
+		<div>
+			<label>新密码:</label>
+			<input id="new_PSW" type="password" />
+		</div>
+		<div>
+			<label>确认新密码:</label>
+			<input id="repeat_PSW" type="password" />
+		</div>
+	</div>
+	<div class="window_footer">
+		<button id="modifyPwd"> 确 定 </button>
+		<button class="cancel"> 取 消 </button>
+	</div>
+</div>
+<div class="setting_window window">
+	<div class="window_title">设置<span class="close_window">×</span></div>
+	<div class="window_body">
+		<h2>生产线参数</h2>
+		<div style="overflow:auto;">
+			<table id="setting_table"  border="0" cellspacing="0" cellpadding="0">
+				<thead>
+					<tr>
+						<th width="120">机器名称</th>
+						<th width="120">IP</th>
+						<th width="120">端口</th>
+					</tr>
+				</thead>
+				<tbody>
+				</tbody>
+			</table>
+		</div>
+	</div>
+	<div class="window_footer">
+		<button id="setting_save"> 保 存 </button>
+		<button class="cancel"> 退 出 </button>
+	</div>
+</div>
+<div class="note_dialog"></div>
+<!-- <div id="container">
+	<div id="output">
+		<div class="containerT">
+			<h1>小拐杖糖生产监控系统</h1>
+			<form class="form" id="entry_form">
+				<input type="text" placeholder="用户名" id="entry_name" value="admin">
+				<input type="password" placeholder="密码" id="entry_password">
+				<button type="button" id="entry_btn">进 入</button>
+				<div id="prompt" class="prompt"></div>
+			</form>
+		</div>
+	</div>
+</div> -->
+<script src="laydate/laydate.js"></script>
+<script type="text/javascript" src="js/index.js" charset="utf-8"></script>
+<script type="text/javascript">
+	entryToMainPage();
+	self.setInterval("TimeRefresh()",2000);
+</script>
+</body>
+</html>

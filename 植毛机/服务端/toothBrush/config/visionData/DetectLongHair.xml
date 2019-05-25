@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf_8"?>
+<root>
+    <arithmetic>
+        <BrushHair_measure_Low>0.289088</BrushHair_measure_Low>
+        <BrushHair_measure_High>1.73453</BrushHair_measure_High>
+        <Sigma>2.3</Sigma>
+        <BrushHairLengthMax>2000</BrushHairLengthMax>
+        <BrushHairLengthMin>0</BrushHairLengthMin>
+    </arithmetic>
+</root>

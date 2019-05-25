@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf_8"?>
+<root>
+    <arithmetic>
+        <DirtAntiShake_Radius>4</DirtAntiShake_Radius>
+        <DirtAntiShake_Width>1.5</DirtAntiShake_Width>
+        <DirtArea_Min>250</DirtArea_Min>
+    </arithmetic>
+</root>

@@ -1,0 +1,34 @@
+package com.sansan.toothbrush.machine.repository;
+
+
+import java.sql.Timestamp;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+
+import com.sansan.toothbrush.machine.entity.ProductionData;
+
+public interface ProductionDataRepository extends JpaRepository<ProductionData, Integer>{
+	
+	//包装机
+	/*@Query(value = "select id from ss_production_data where connect_info_id = 1 and DATE_FORMAT(start_time,\"%Y-%m-%d\") =?2  and order_status = 0",nativeQuery=true)
+	public String findPackProduction_data_id(@Param("connect_Info_id") int connect_Info_id,String time);*/
+	
+	@Query(value = "select * from ss_production_data where connect_info_id = ?1 and DATE_FORMAT(create_time,'%Y-%m-%d') like ?2",nativeQuery=true)
+	public ProductionData findFlockingProduction_data_id(int connect_Info_id,String time);
+	
+	@Modifying
+	@Query(value = "update ss_production_data pd set pd.`name`=?1,pd.connect_Info_id = ?2,pd.ok = ?3,pd.ng = ?4,pd.total = ?5,pd.state = ?6,pd.owe_hole = ?7,pd.long_hair = ?8,pd.Long_short_hair=?9,pd.loose_wool=?10,pd.implantation_error = ?11,pd.difference_hair = ?12,pd.dirty=?13,pd.end_time = ?14 where pd.id = ?15",nativeQuery=true)
+	public int update(String name,int connectInfoId,int ok,int ng,int total,String state,int oweHole,int longHair,int longShortHair,int looseWool,int implantationError,int differenceHair,int dirty,Timestamp endTime, int Prodata_id);
+	
+	
+	@Modifying
+	@Query(value = "update ss_production_data pd set pd.state = ?1 where pd.id = ?2",nativeQuery=true)
+	public int updateState(String state,int id);
+	@Modifying
+	@Query(value = "update ss_production_data pd set pd.start_time = ?1 where pd.id = ?2",nativeQuery=true)
+	public void updateStart_time(Timestamp start_time,int id);
+
+}

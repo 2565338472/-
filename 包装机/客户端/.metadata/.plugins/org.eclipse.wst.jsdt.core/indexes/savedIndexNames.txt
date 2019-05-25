@@ -1,0 +1,5 @@
+INDEX VERSION 1.4+H:\我的模块\植毛CCD联网+包装CCD联网\包装机\客户端\.metadata\.plugins\org.eclipse.wst.jsdt.core\indexes
+1961024274.index
+1932626524.index
+1306556821.index
+1697156671.index

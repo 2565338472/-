@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf_8"?>
+<root>
+    <arithmetic>
+        <BrushHeadMiddleLength_Min_In>20</BrushHeadMiddleLength_Min_In>
+        <Sigma>2.3</Sigma>
+        <BrushHeadMiddleCount_In>3</BrushHeadMiddleCount_In>
+        <ToothBrushColor>0</ToothBrushColor>
+        <BrushHeadTopLength_Min_In>30</BrushHeadTopLength_Min_In>
+        <BrushHeadTopCount_In>2</BrushHeadTopCount_In>
+    </arithmetic>
+</root>

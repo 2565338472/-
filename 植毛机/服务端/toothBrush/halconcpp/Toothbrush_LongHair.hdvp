@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<hdevelop file_version="1.0" halcon_version="10.0" cs="956514074">
+<procedure name="Toothbrush_LongHair">
+<interface>
+<io>
+<par name="ImageSub"/>
+<par name="RectangleROIDiff_2"/>
+</io>
+<oo>
+<par name="ToothbrushHairRegion"/>
+<par name="ToothBrushRegion"/>
+</oo>
+<ic>
+<par name="Sigma"/>
+<par name="BrushHair_measure_Low"/>
+<par name="BrushHair_measure_High"/>
+<par name="BrushHairLengthMin"/>
+<par name="BrushHairLengthMax"/>
+</ic>
+</interface>
+<body>
+<l>    gen_empty_obj (ToothbrushHairRegion)</l>
+<l>    reduce_domain (ImageSub, RectangleROIDiff_2, ImageReduced)</l>
+<l>    mean_image (ImageReduced, ImageMean, 3, 3)</l>
+<c>*     calculate_lines_gauss_parameters (8, [20,5], Sigma, BrushHair_measure_Low, BrushHair_measure_High)</c>
+<l>    lines_gauss (ImageMean, Lines, Sigma, BrushHair_measure_Low, BrushHair_measure_High, 'light', 'true', 'parabolic', 'true')</l>
+<l>    select_contours_xld (Lines, ToothbrushHair, 'contour_length', BrushHairLengthMin, BrushHairLengthMax, -0.5, 0.5)</l>
+<l>    gen_region_contour_xld(ToothbrushHair, ToothbrushHairRegion, 'filled')</l>
+<l>    connection(ToothbrushHairRegion, ConnectedRegions)</l>
+<c>    </c>
+<l>    gen_empty_obj(ToothbrushHairRegionAll)</l>
+<l>    dilation_circle(ConnectedRegions, RegionDilation1, 25)</l>
+<l>    count_obj(RegionDilation1, HairNumber)</l>
+<l>    shape_trans (RectangleROIDiff_2, RectROI_Trans, 'convex')</l>
+<l>    difference (RectROI_Trans, RectangleROIDiff_2, ToothBrushRegion)</l>
+<l>    for K := 1 to HairNumber by 1</l>
+<l>        select_obj(RegionDilation1, HairSelected, K)</l>
+<l>        intersection(HairSelected, ToothBrushRegion, RegionIntersection1)</l>
+<l>        area_center(RegionIntersection1, Area, Row, Column)</l>
+<l>        if(Area &gt; 5)</l>
+<l>            concat_obj(ToothbrushHairRegionAll, HairSelected, ToothbrushHairRegionAll)</l>
+<l>        endif</l>
+<l>    endfor  </l>
+<l>    intersection(ConnectedRegions, ToothbrushHairRegionAll, ConnectedRegions)</l>
+<l>    select_shape(ConnectedRegions, ToothbrushHairRegion, 'rect2_len1', 'and', BrushHairLengthMin, BrushHairLengthMax)</l>
+<l>return ()</l>
+</body>
+<docu id="Toothbrush_LongHair">
+<parameters>
+<parameter id="BrushHairLengthMax"/>
+<parameter id="BrushHairLengthMin"/>
+<parameter id="BrushHair_measure_High"/>
+<parameter id="BrushHair_measure_Low"/>
+<parameter id="ImageSub"/>
+<parameter id="RectangleROIDiff_2"/>
+<parameter id="Sigma"/>
+<parameter id="ToothBrushRegion"/>
+<parameter id="ToothbrushHairRegion"/>
+</parameters>
+</docu>
+</procedure>
+</hdevelop>

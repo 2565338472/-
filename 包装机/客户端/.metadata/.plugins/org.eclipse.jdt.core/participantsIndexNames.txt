@@ -1,0 +1,3 @@
+INDEX VERSION 1.131
+H:\我的模块\植毛CCD联网+包装CCD联网\包装机\客户端\.metadata\.plugins\org.eclipse.jst.jsp.core\jspsearch\2219858625.index
+\TestOne\src\main\resources
